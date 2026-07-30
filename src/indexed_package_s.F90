@@ -1,4 +1,5 @@
 submodule(indexed_package_m) indexed_package_s
+  use julienne_m, only : stop_and_print
   implicit none
 
   interface get_key_value
@@ -76,18 +77,40 @@ contains
     character(len=:), allocatable :: key_value, characters
     integer l
 
-    search_lines_for_key: &
+    key_value_search: &
     do l = 1, size(lines)
       characters = lines(l)%string()
-      if (index(characters, "#") /= 0) characters = before("#", characters)
+      if (skip(characters)) cycle
       associate(colon => index(characters, ":"))
         if (colon == 0) error stop "missing key/value separator ':'"
         if (any(characters(1:colon-1) == key)) then
           key_value = characters(colon+1:)
-          exit search_lines_for_key
+          return
         end if
       end associate
-    end do search_lines_for_key
+    end do key_value_search
+
+    key_value = ""
+
+  contains
+
+    pure function skip(line) result(comment_or_blank)
+      character(len=*), intent(in) :: line
+      logical comment_or_blank
+
+      if (len(trim(line)) == 0) then
+         comment_or_blank = .true.
+      else 
+        associate(hash_etc => adjustl(line))
+          if (hash_etc(1:1) == "#") then
+            comment_or_blank = .true.
+          else
+            comment_or_blank = .false.
+            return
+          end if
+        end associate
+      end if
+    end function
 
   end function
 

@@ -8,7 +8,7 @@ module package_index_m
 
   type, extends(file_t) :: package_index_t
     !! Encapsulate package list from from the fortran-lang package_index.yml file
-    private
+    !private
     type(indexed_package_t), allocatable :: packages_(:)
   end type
 

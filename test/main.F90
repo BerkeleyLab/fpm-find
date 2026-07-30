@@ -8,6 +8,7 @@ program main
   print '(a)', "The fortran-lang 'package_index.yml' reader"
 
   associate(packages => package_index_t(berkeley_packages()))
+    print *,size(packages%packages_)
   end associate
 
 contains
