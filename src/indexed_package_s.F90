@@ -32,30 +32,6 @@ contains
     end if
   end procedure
 
-  pure function after(substring, line) result(characters_after_substring)
-    character(len=*), intent(in) :: substring, line
-    character(len=:), allocatable :: characters_after_substring
-    associate(location => index(line, substring))
-      if (location == 0) then
-        characters_after_substring = ""
-      else 
-        characters_after_substring = line(location+1:)
-      end if
-    end associate
-  end function
-
-  pure function before(substring, line) result(characters_before_substring)
-    character(len=*), intent(in) :: substring, line
-    character(len=:), allocatable :: characters_before_substring
-    associate(location => index(line, substring))
-      if (location == 0) then
-        characters_before_substring = ""
-      else 
-        characters_before_substring = line(:location-1)
-      end if
-    end associate
-  end function
-
   pure function get_key_value_from_string_mold(key, lines, mold) result(key_value)
     character(len=*), intent(in) :: key
     type(string_t), intent(in) :: lines(:)
