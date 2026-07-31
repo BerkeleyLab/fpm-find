@@ -113,4 +113,18 @@ contains
     end associate
   end procedure
 
+  module procedure contains
+    match = any(0 /= [ &
+       index(self%name_       , search_string)  &
+      ,index(self%description_, search_string)  &
+      ,index(self%categories_ , search_string)  &
+      ,index(self%tags_       , search_string)  & 
+      ,index(self%github_     , search_string)  &
+      ,index(self%gitlab_     , search_string)  &
+      ,index(self%url_        , search_string)  &
+      ,index(self%license_    , search_string)  &
+      ,index(self%version_    , search_string)  &
+    ])
+  end procedure
+
 end submodule indexed_package_s

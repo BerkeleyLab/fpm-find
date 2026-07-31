@@ -12,6 +12,7 @@ module package_index_m
     type(indexed_package_t), allocatable :: packages_(:)
   contains
     procedure as_text
+    procedure find 
   end type
 
   interface package_index_t
@@ -32,6 +33,14 @@ module package_index_m
       implicit none
       class(package_index_t), intent(in) :: self
       character(len=:), allocatable :: index_as_text
+    end function
+
+    pure module function find(self, search_string) result(package_list)
+      !! Result is a listing of the packages that have entries containing the provided search_string
+      implicit none
+      class(package_index_t), intent(in) :: self
+      character(len=*), intent(in) :: search_string
+      character(len=:), allocatable :: package_list
     end function
 
   end interface

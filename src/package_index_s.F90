@@ -1,5 +1,5 @@
 submodule(package_index_m) package_index_s
-  use julienne_m, only : string_t, stop_and_print
+  use julienne_m, only : string_t
   implicit none
 
 contains
@@ -77,6 +77,17 @@ contains
     do p = 1, size(self%packages_)
       index_as_text = index_as_text // new_line('') // self%packages_(p)%as_text()
     end do
+  end procedure
+
+  module procedure find
+    integer p
+
+    allocate(character(len=0) :: package_list)
+
+    do p = 1, size(self%packages_)
+      if (self%packages_(p)%contains(search_string)) package_list = package_list // new_line('') // self%packages_(p)%as_text() // new_line('')
+    end do
+
   end procedure
 
 end submodule package_index_s

@@ -14,6 +14,7 @@ module indexed_package_m
     character(len=:), allocatable :: license_, version_     ! optional (zero length if not present)
   contains
     procedure as_text
+    procedure contains
   end type
 
   interface indexed_package_t
@@ -43,6 +44,13 @@ module indexed_package_m
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: text
+    end function
+
+    pure module function contains(self, search_string) result(match)
+      implicit none
+      class(indexed_package_t), intent(in) :: self
+      character(len=*), intent(in) :: search_string
+      logical match
     end function
 
   end interface
