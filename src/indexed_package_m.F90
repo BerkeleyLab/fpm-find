@@ -9,22 +9,26 @@ module indexed_package_m
   type indexed_package_t
     !! Encapslate package-specific information from the fortran-lang package_index.yml file
     private
-    character(len=:), allocatable :: name_, host_, description_, categories_
+    character(len=:), allocatable :: name_, description_, categories_
     type(string_t), allocatable :: tags_(:)
-    character(len=:), allocatable :: license_, version_ ! optional (zero length if not present)
+    character(len=:), allocatable :: github_, gitlab_, url_ ! optional (zero length if not present)
+    character(len=:), allocatable :: license_, version_     ! optional (zero length if not present)
   contains
     procedure package_data
   end type
 
   interface indexed_package_t
 
-    pure module function new_indexed_package_from_components(name, host, description, categories, tags, license, version) &
+    pure module function new_indexed_package_from_components( &
+      name, description, categories, tags, license, version, github, gitlab, url &
+    ) &
       result(indexed_package)
       !! Construct new indexed_package_t object from components
       implicit none
-      character(len=*), intent(in) :: name, host, description, categories
+      character(len=*), intent(in) :: name, description, categories
       type(string_t), intent(in) :: tags(:)
       character(len=*), intent(in), optional :: license, version
+      character(len=*), intent(in), optional :: github, gitlab, url
       type(indexed_package_t) indexed_package 
     end function
 

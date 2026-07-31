@@ -12,7 +12,9 @@ contains
 
   module procedure new_indexed_package_from_components
     indexed_package%name_        = name
-    indexed_package%host_        = host
+    indexed_package%github_      = github
+    indexed_package%gitlab_      = gitlab
+    indexed_package%url_         = url
     indexed_package%description_ = description
     indexed_package%categories_  = categories
     indexed_package%tags_        = tags
@@ -117,7 +119,9 @@ contains
   module procedure new_indexed_package_from_lines
     indexed_package = indexed_package_t( &
        name        =  get_key_value(     "- name", lines, mold = "") &
-      ,host        =  get_key_value([string_t("github"), string_t("gitlab"), string_t("url")], lines, mold = "") &
+      ,github      =  get_key_value(     "github", lines, mold = "") &
+      ,gitlab      =  get_key_value(     "gitlab", lines, mold = "") &
+      ,url         =  get_key_value(        "url", lines, mold = "") &
       ,description =  get_key_value("description", lines, mold = "") &
       ,categories  =  get_key_value( "categories", lines, mold = "") &
       ,tags        = [get_key_value(     "- name", lines, mold = string_t(""))] &
@@ -129,14 +133,16 @@ contains
   module procedure package_data
     associate(data_string =>                                         &
          "name : "        //       self%name_        // new_line('') &
-      // "host : "        //       self%host_        // new_line('') &
       // "description : " //       self%description_ // new_line('') &
       // "categories : "  //       self%categories_  // new_line('') &
       // "tags : "        // .csv. self%tags_                        &
     )
       data = data_string%string()
-      if (allocated(self%license_)) data = data // new_line('') // "license : " // self%license_
-      if (allocated(self%version_)) data = data // new_line('') // "version : " // self%version_
+      if (len(self%github_ )/=0) data = data // new_line('') // "github : "  // self%github_
+      if (len(self%gitlab_ )/=0) data = data // new_line('') // "gitlab : "  // self%gitlab_
+      if (len(self%url_    )/=0) data = data // new_line('') // "url : "     // self%url_
+      if (len(self%license_)/=0) data = data // new_line('') // "license : " // self%license_
+      if (len(self%version_)/=0) data = data // new_line('') // "version : " // self%version_
     end associate
   end procedure
 end submodule indexed_package_s

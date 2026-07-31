@@ -33,7 +33,7 @@ contains
       ,string_t("# Section Header") &
       ,string_t("") &
       ,string_t("- name: assert") &
-      ,string_t("  github: BerkeleyLab/assert") &
+      ,string_t("  url: https://github.com/BerkeleyLab/assert") &
       ,string_t("  description: Formulaic mimetic abstraction language") &
       ,string_t("  categories: numerical") &
       ,string_t("  tags: machine-learning deep-learning high-performance-computing") &
