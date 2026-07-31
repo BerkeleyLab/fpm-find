@@ -69,4 +69,14 @@ contains
 
   end procedure
 
+  module procedure as_text
+    integer p
+
+    allocate(character(len=0) :: index_as_text)
+
+    do p = 1, size(self%packages_)
+      index_as_text = index_as_text // new_line('') // self%packages_(p)%as_text()
+    end do
+  end procedure
+
 end submodule package_index_s

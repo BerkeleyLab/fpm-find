@@ -14,7 +14,7 @@ module indexed_package_m
     character(len=:), allocatable :: github_, gitlab_, url_ ! optional (zero length if not present)
     character(len=:), allocatable :: license_, version_     ! optional (zero length if not present)
   contains
-    procedure package_data
+    procedure as_text
   end type
 
   interface indexed_package_t
@@ -43,7 +43,7 @@ module indexed_package_m
 
   interface
 
-    pure module function package_data(self) result(data)
+    pure module function as_text(self) result(data)
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: data

@@ -8,8 +8,10 @@ module package_index_m
 
   type, extends(file_t) :: package_index_t
     !! Encapsulate package list from from the fortran-lang package_index.yml file
-    !private
+    private
     type(indexed_package_t), allocatable :: packages_(:)
+  contains
+    procedure as_text
   end type
 
   interface package_index_t
@@ -19,6 +21,17 @@ module package_index_m
       implicit none
       type(file_t), intent(in) :: yaml_file
       type(package_index_t) package_index
+    end function
+
+  end interface
+
+  interface
+ 
+    pure module function as_text(self) result(index_as_text)
+      !! Result is a printable listing of the full index of packages
+      implicit none
+      class(package_index_t), intent(in) :: self
+      character(len=:), allocatable :: index_as_text
     end function
 
   end interface

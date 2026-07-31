@@ -5,12 +5,10 @@ program main
 
   integer p
 
-  print '(a)', "The fortran-lang 'package_index.yml' reader"
+  print '(a)', "The fortran-lang 'package_index.yml' file contents:"
 
   associate(packages => package_index_t(berkeley_packages()))
-    do p = 1, size(packages%packages_)
-      print '(a)', packages%packages_(p)%package_data()
-    end do
+    print '(a)', packages%as_text()
   end associate
 
 contains

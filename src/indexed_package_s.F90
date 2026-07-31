@@ -130,7 +130,7 @@ contains
     )
   end procedure
 
-  module procedure package_data
+  module procedure as_text
     associate(data_string =>                                         &
          "name : "        //       self%name_        // new_line('') &
       // "description : " //       self%description_ // new_line('') &
@@ -145,4 +145,5 @@ contains
       if (len(self%version_)/=0) data = data // new_line('') // "version : " // self%version_
     end associate
   end procedure
+
 end submodule indexed_package_s
