@@ -114,17 +114,32 @@ contains
   end procedure
 
   module procedure contains
+
     match = any(0 /= [ &
-       index(self%name_       , search_string)  &
-      ,index(self%description_, search_string)  &
-      ,index(self%categories_ , search_string)  &
-      ,index(self%tags_       , search_string)  & 
-      ,index(self%github_     , search_string)  &
-      ,index(self%gitlab_     , search_string)  &
-      ,index(self%url_        , search_string)  &
-      ,index(self%license_    , search_string)  &
-      ,index(self%version_    , search_string)  &
+       index(lower_case(self%name_)       , lower_case(search_string)) &
+      ,index(lower_case(self%description_), lower_case(search_string)) &
+      ,index(lower_case(self%categories_) , lower_case(search_string)) &
+      ,index(lower_case(self%tags_)       , lower_case(search_string)) &
+      ,index(lower_case(self%github_)     , lower_case(search_string)) &
+      ,index(lower_case(self%gitlab_)     , lower_case(search_string)) &
+      ,index(lower_case(self%url_)        , lower_case(search_string)) &
+      ,index(lower_case(self%license_)    , lower_case(search_string)) &
+      ,index(lower_case(self%version_)    , lower_case(search_string)) &
     ])
+
+  contains
+
+    pure function lower_case(string) result(lower_case_string)
+      character(len=*), intent(in) :: string
+      character(len=len(string))   :: lower_case_string
+
+      do concurrent(integer :: i = 1:len(string)) default(none) shared(string, lower_case_string)
+        associate(char => iachar(string(i:i)))
+          lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
+        end associate
+      end do
+    end function
+
   end procedure
 
 end submodule indexed_package_s
