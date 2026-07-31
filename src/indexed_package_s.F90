@@ -1,23 +1,31 @@
 submodule(indexed_package_m) indexed_package_s
-  use julienne_m, only : stop_and_print, operator(.csv.)
   implicit none
-
-  interface get_key_value
-    module procedure get_key_value_from_character_mold
-    module procedure get_key_value_from_string_mold
-    module procedure get_array_key_value_from_character_mold
-  end interface
 
 contains
 
-  module procedure new_indexed_package_from_components
+  module procedure construct_from_components
     indexed_package%name_        = name
-    indexed_package%github_      = github
-    indexed_package%gitlab_      = gitlab
-    indexed_package%url_         = url
     indexed_package%description_ = description
     indexed_package%categories_  = categories
     indexed_package%tags_        = tags
+
+    if (present(github)) then
+      indexed_package%github_ = github
+    else
+      allocate(character(len=0) :: indexed_package%github_)
+    end if
+
+    if (present(gitlab)) then
+      indexed_package%gitlab_ = gitlab
+    else
+      allocate(character(len=0) :: indexed_package%gitlab_)
+    end if
+
+    if (present(url)) then
+      indexed_package%url_ = url
+    else
+      allocate(character(len=0) :: indexed_package%url_)
+    end if
 
     if (present(license)) then
       indexed_package%license_ = license
@@ -32,39 +40,22 @@ contains
     end if
   end procedure
 
-  pure function get_key_value_from_string_mold(key, lines, mold) result(key_value)
+  pure function get_key_value(key, lines) result(key_value)
     character(len=*), intent(in) :: key
     type(string_t), intent(in) :: lines(:)
-    type(string_t), intent(in) :: mold
-    type(string_t) key_value
-    key_value = get_array_key_value_from_character_mold([string_t(key)], lines, mold%string())
-  end function
-
-  pure function get_key_value_from_character_mold(key, lines, mold) result(key_value)
-    character(len=*), intent(in) :: key
-    type(string_t), intent(in) :: lines(:)
-    character(len=*), intent(in) :: mold
     character(len=:), allocatable :: key_value
-    key_value = get_array_key_value_from_character_mold([string_t(key)], lines, mold)
-  end function
-
-  pure function get_array_key_value_from_character_mold(key, lines, mold) result(key_value)
-    type(string_t), intent(in) :: key(:)
-    type(string_t), intent(in) :: lines(:)
-    character(len=*), intent(in) :: mold
-    character(len=:), allocatable :: key_value, characters
-    integer l, k
- 
+    integer l
 
     do l = 1, size(lines)
-      characters = lines(l)%string()
-      if (skip(characters)) cycle
-      associate(colon => index(characters, ":"))
-        if (colon == 0) error stop "missing key/value separator ':'"
-        if (any([(index(characters(1:colon-1), key(k)%string())/=0, k=1,size(key))])) then
-          key_value = characters(colon+1:)
-          return
-        end if
+      associate(characters => lines(l)%string())
+        if (skip(characters)) cycle
+        associate(colon => index(characters, ":"))
+          if (colon == 0) error stop "missing key/value separator ':'"
+          if (index(characters(1:colon-1), key)/=0)then
+            key_value = characters(colon+1:)
+            return
+          end if
+        end associate
       end associate
     end do
 
@@ -92,33 +83,33 @@ contains
 
   end function
 
-  module procedure new_indexed_package_from_lines
-    indexed_package = indexed_package_t( &
-       name        =  get_key_value(     "- name", lines, mold = "") &
-      ,github      =  get_key_value(     "github", lines, mold = "") &
-      ,gitlab      =  get_key_value(     "gitlab", lines, mold = "") &
-      ,url         =  get_key_value(        "url", lines, mold = "") &
-      ,description =  get_key_value("description", lines, mold = "") &
-      ,categories  =  get_key_value( "categories", lines, mold = "") &
-      ,tags        = [get_key_value(     "- name", lines, mold = string_t(""))] &
-      ,license     =  get_key_value(    "license", lines, mold = "") &
-      ,version     =  get_key_value(    "version", lines, mold = "") &
+  module procedure construct_from_strings
+    indexed_package = construct_from_components( &
+       name        =  get_key_value(     "- name", lines) &
+      ,description =  get_key_value("description", lines) &
+      ,categories  =  get_key_value( "categories", lines) &
+      ,tags        =  get_key_value(       "tags", lines) &
+      ,github      =  get_key_value(     "github", lines) &
+      ,gitlab      =  get_key_value(     "gitlab", lines) &
+      ,url         =  get_key_value(        "url", lines) &
+      ,license     =  get_key_value(    "license", lines) &
+      ,version     =  get_key_value(    "version", lines) &
     )
   end procedure
 
   module procedure as_text
-    associate(data_string =>                                         &
-         "name : "        //       self%name_        // new_line('') &
-      // "description : " //       self%description_ // new_line('') &
-      // "categories : "  //       self%categories_  // new_line('') &
-      // "tags : "        // .csv. self%tags_                        &
+    associate(lines =>                                         &
+         "name : "        // self%name_        // new_line('') &
+      // "description : " // self%description_ // new_line('') &
+      // "categories : "  // self%categories_  // new_line('') &
+      // "tags : "        // self%tags_                        &
     )
-      data = data_string%string()
-      if (len(self%github_ )/=0) data = data // new_line('') // "github : "  // self%github_
-      if (len(self%gitlab_ )/=0) data = data // new_line('') // "gitlab : "  // self%gitlab_
-      if (len(self%url_    )/=0) data = data // new_line('') // "url : "     // self%url_
-      if (len(self%license_)/=0) data = data // new_line('') // "license : " // self%license_
-      if (len(self%version_)/=0) data = data // new_line('') // "version : " // self%version_
+      text = lines
+      if (len(self%github_ )/=0) text = text // new_line('') // "github : "  // self%github_
+      if (len(self%gitlab_ )/=0) text = text // new_line('') // "gitlab : "  // self%gitlab_
+      if (len(self%url_    )/=0) text = text // new_line('') // "url : "     // self%url_
+      if (len(self%license_)/=0) text = text // new_line('') // "license : " // self%license_
+      if (len(self%version_)/=0) text = text // new_line('') // "version : " // self%version_
     end associate
   end procedure
 
