@@ -1,5 +1,5 @@
 submodule(indexed_package_m) indexed_package_s
-  use julienne_m, only : stop_and_print
+  use julienne_m, only : stop_and_print, operator(.csv.)
   implicit none
 
   interface get_key_value
@@ -75,20 +75,20 @@ contains
     type(string_t), intent(in) :: lines(:)
     character(len=*), intent(in) :: mold
     character(len=:), allocatable :: key_value, characters
-    integer l
+    integer l, k
+ 
 
-    key_value_search: &
     do l = 1, size(lines)
       characters = lines(l)%string()
       if (skip(characters)) cycle
       associate(colon => index(characters, ":"))
         if (colon == 0) error stop "missing key/value separator ':'"
-        if (any(characters(1:colon-1) == key)) then
+        if (any([(index(characters(1:colon-1), key(k)%string())/=0, k=1,size(key))])) then
           key_value = characters(colon+1:)
           return
         end if
       end associate
-    end do key_value_search
+    end do
 
     key_value = ""
 
@@ -116,14 +116,27 @@ contains
 
   module procedure new_indexed_package_from_lines
     indexed_package = indexed_package_t( &
-       name        = get_key_value(     "- name", lines, mold = "") &
-      ,host        = get_key_value([string_t("github"), string_t("gitlab"), string_t("url")], lines, mold = "") &
-      ,description = get_key_value("description", lines, mold = "") &
-      ,categories  = get_key_value( "categories", lines, mold = "") &
-      ,tags        = [get_key_value(          "tags", lines, mold = string_t(""))] &
-      ,license     = get_key_value(    "license", lines, mold = "") &
-      ,version     = get_key_value(    "version", lines, mold = "") &
+       name        =  get_key_value(     "- name", lines, mold = "") &
+      ,host        =  get_key_value([string_t("github"), string_t("gitlab"), string_t("url")], lines, mold = "") &
+      ,description =  get_key_value("description", lines, mold = "") &
+      ,categories  =  get_key_value( "categories", lines, mold = "") &
+      ,tags        = [get_key_value(     "- name", lines, mold = string_t(""))] &
+      ,license     =  get_key_value(    "license", lines, mold = "") &
+      ,version     =  get_key_value(    "version", lines, mold = "") &
     )
   end procedure
 
+  module procedure package_data
+    associate(data_string =>                                         &
+         "name : "        //       self%name_        // new_line('') &
+      // "host : "        //       self%host_        // new_line('') &
+      // "description : " //       self%description_ // new_line('') &
+      // "categories : "  //       self%categories_  // new_line('') &
+      // "tags : "        // .csv. self%tags_                        &
+    )
+      data = data_string%string()
+      if (allocated(self%license_)) data = data // new_line('') // "license : " // self%license_
+      if (allocated(self%version_)) data = data // new_line('') // "version : " // self%version_
+    end associate
+  end procedure
 end submodule indexed_package_s

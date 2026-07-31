@@ -3,12 +3,14 @@ program main
   use package_index_m, only : package_index_t
   implicit none
 
-  integer package_count
+  integer p
 
   print '(a)', "The fortran-lang 'package_index.yml' reader"
 
   associate(packages => package_index_t(berkeley_packages()))
-    print *,size(packages%packages_)
+    do p = 1, size(packages%packages_)
+      print '(a)', packages%packages_(p)%package_data()
+    end do
   end associate
 
 contains

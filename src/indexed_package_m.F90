@@ -12,6 +12,8 @@ module indexed_package_m
     character(len=:), allocatable :: name_, host_, description_, categories_
     type(string_t), allocatable :: tags_(:)
     character(len=:), allocatable :: license_, version_ ! optional (zero length if not present)
+  contains
+    procedure package_data
   end type
 
   interface indexed_package_t
@@ -31,6 +33,16 @@ module indexed_package_m
       implicit none
       type(string_t), intent(in) :: lines(:)
       type(indexed_package_t) indexed_package 
+    end function
+
+  end interface
+
+  interface
+
+    pure module function package_data(self) result(data)
+      implicit none
+      class(indexed_package_t), intent(in) :: self
+      character(len=:), allocatable :: data
     end function
 
   end interface
