@@ -85,7 +85,7 @@ contains
     allocate(character(len=0) :: package_list)
 
     do p = 1, size(self%packages_)
-      if (self%packages_(p)%contains(search_string)) package_list = package_list // self%packages_(p)%as_text()
+      if (self%packages_(p)%contains(search_string)) package_list = package_list // self%packages_(p)%as_text() // new_line('')
     end do
 
   end procedure

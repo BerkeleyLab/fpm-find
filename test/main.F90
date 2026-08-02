@@ -71,11 +71,11 @@ program main
       ,  formal_pkg => indexed_package_t(formal) &
       ,julienne_pkg => indexed_package_t(julienne) &
     )
-      print fmt,"  " // check(packages%find(  "assert")  ==   assert_pkg%as_text()) // " matching the 'assert' package index item"
-      print fmt,"  " // check(packages%find("caffeine")  == caffeine_pkg%as_text()) // " matching the 'caffeine' package index item"
-      print fmt,"  " // check(packages%find(  "formal")  ==   formal_pkg%as_text()) // " matching the 'formal' package index item"
-      print fmt,"  " // check(packages%find("julienne")  == julienne_pkg%as_text()) // " matching the 'julienne' package index item"
-      print fmt,"  " // check(packages%find("numerical") ==   formal_pkg%as_text()) // " finding a package based on category text"
+      print fmt,"  " // check(packages%find(  "assert")  ==   assert_pkg%as_text() // new_line('') // julienne_pkg%as_text() // new_line('')) // " searching on a string that matches two packages"
+      print fmt,"  " // check(packages%find("caffeine")  == caffeine_pkg%as_text() // new_line('')) // " matching the 'caffeine' package index item"
+      print fmt,"  " // check(packages%find(  "formal")  ==   formal_pkg%as_text() // new_line('')) // " matching the 'formal' package index item"
+      print fmt,"  " // check(packages%find("julienne")  == julienne_pkg%as_text() // new_line('')) // " matching the 'julienne' package index item"
+      print fmt,"  " // check(packages%find("numerical") ==   formal_pkg%as_text() // new_line('')) // " finding a package based on category text"
       print fmt,"  " // check(packages%find("fake")      == "") // " returning zero-length text for a non-existant package search"
     end associate
   end associate define_package_index_file_object
