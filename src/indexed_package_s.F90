@@ -47,7 +47,9 @@ contains
     integer l
 
     do l = 1, size(lines)
-      associate(characters => lines(l)%string())
+      block
+        character(len=:), allocatable :: characters
+        characters = lines(l)%string()
         if (skip(characters)) cycle
         associate(colon => index(characters, ":"))
           if (colon == 0) error stop "missing key/value separator ':'"
@@ -56,7 +58,7 @@ contains
             return
           end if
         end associate
-      end associate
+      end block
     end do
 
     key_value = ""
@@ -69,15 +71,17 @@ contains
 
       if (len(trim(line)) == 0) then
          comment_or_blank = .true.
-      else 
-        associate(hash_etc => adjustl(line))
+      else
+        block
+          character(len=:), allocatable :: hash_etc
+          hash_etc = adjustl(line)
           if (hash_etc(1:1) == "#") then
             comment_or_blank = .true.
           else
             comment_or_blank = .false.
             return
           end if
-        end associate
+        end block
       end if
     end function
 

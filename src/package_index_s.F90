@@ -54,17 +54,23 @@ contains
        character(len=*), intent(in) :: line
        logical match
 
-       associate(dash_blank_etc => adjustl(line))
+       block
+         character(len=:), allocatable :: dash_blank_etc
+         dash_blank_etc = adjustl(line)
           match = dash_blank_etc(1:2) == "- " 
           if (.not. match) return
-          associate(name_etc => adjustl(dash_blank_etc(len("- ")+1:)))
-             match = name_etc(1:4) == "name" 
-             if (.not. match) return
-             associate(colon_etc => adjustl(name_etc(len("name")+1:)))
-               match = colon_etc(1:1) == ":" 
-             end associate
-          end associate
-       end associate
+          block
+            character(len=:), allocatable :: name_etc
+            name_etc = adjustl(dash_blank_etc(len("- ")+1:))
+            match = name_etc(1:4) == "name"
+            if (.not. match) return
+            block
+              character(len=:), allocatable :: colon_etc
+              colon_etc = adjustl(name_etc(len("name")+1:))
+              match = colon_etc(1:1) == ":"
+            end block
+          end block
+       end block
     end function
 
   end procedure
