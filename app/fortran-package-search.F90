@@ -1,5 +1,5 @@
 program fortran_package_search
-  use julienne_m, only : file_t, string_t, command_line_t
+  use julienne_m, only : file_t, command_line_t
   use package_index_m, only : package_index_t
   implicit none
 
@@ -26,11 +26,11 @@ program fortran_package_search
     integer exit_status
 
     call execute_command_line( &
-      command = "curl --silent -L " // index_url_base // index_file // " > " // index_path // index_file, & 
+      command = "curl --silent -L " // index_url_base // index_file // " > " // index_path // index_file, &
       wait = .true., &
       exitstat = exit_status &
     )
- 
+
     if (exit_status /= 0) then
       call execute_command_line( &
          command  = "wget --quiet -O " // index_path // index_file // " " // index_url_base // index_file &
