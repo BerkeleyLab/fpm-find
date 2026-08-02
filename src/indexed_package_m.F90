@@ -36,6 +36,13 @@ module indexed_package_m
       type(indexed_package_t) indexed_package 
     end function
 
+    pure module function construct_from_characters(new_line_separated) result(indexed_package)
+      !! Construct new indexed_package_t object from file lines
+      implicit none
+      character(len=*), intent(in) :: new_line_separated
+      type(indexed_package_t) indexed_package 
+    end function
+
   end interface
 
   interface

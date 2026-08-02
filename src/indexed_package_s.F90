@@ -97,20 +97,66 @@ contains
     )
   end procedure
 
+  module procedure construct_from_characters
+
+    type(string_t), allocatable :: lines(:)
+    integer l
+
+    associate(delimiter_locations  => [1, new_line_locations(new_line_separated), len(new_line_separated)])
+
+      allocate(lines(size(delimiter_locations)-1))
+
+      l = 1
+      lines(l) = new_line_separated(delimiter_locations(l):delimiter_locations(l+1)-1)
+
+      do l = 2, size(lines)
+        lines(l) = new_line_separated(delimiter_locations(l)+1:delimiter_locations(l+1)-1)
+      end do
+
+    end associate
+
+    indexed_package = indexed_package_t(lines) 
+
+  contains
+
+    pure function new_line_locations(characters) result(locations)
+      character(len=*), intent(in) :: characters
+      integer, allocatable :: locations(:), tmp(:)
+      integer new_lines, c
+
+      new_lines = 0
+      allocate(locations(new_lines))
+
+      do c = 1, len(characters)
+        if (characters(c:c) == new_line('')) then
+          new_lines = new_lines + 1
+          if (new_lines > size(locations)) then 
+            call move_alloc(locations, tmp)
+            allocate(locations(2*new_lines))
+            locations(1:size(tmp)) = tmp 
+            deallocate(tmp)
+          end if
+          locations(new_lines) = c
+        end if
+      end do
+
+      locations = locations(1:new_lines)
+
+    end function
+
+  end procedure
+
   module procedure as_text
-    associate(lines =>                                         &
-         "name : "        // self%name_        // new_line('') &
+    text = &
+         "- name : "      // self%name_        // new_line('') &
       // "description : " // self%description_ // new_line('') &
       // "categories : "  // self%categories_  // new_line('') &
-      // "tags : "        // self%tags_                        &
-    )
-      text = lines
-      if (len(self%github_ )/=0) text = text // new_line('') // "github : "  // self%github_
-      if (len(self%gitlab_ )/=0) text = text // new_line('') // "gitlab : "  // self%gitlab_
-      if (len(self%url_    )/=0) text = text // new_line('') // "url : "     // self%url_
-      if (len(self%license_)/=0) text = text // new_line('') // "license : " // self%license_
-      if (len(self%version_)/=0) text = text // new_line('') // "version : " // self%version_
-    end associate
+      // "tags : "        // self%tags_
+    if (len(self%github_ )/=0) text = text // new_line('') // "github : "  // self%github_
+    if (len(self%gitlab_ )/=0) text = text // new_line('') // "gitlab : "  // self%gitlab_
+    if (len(self%url_    )/=0) text = text // new_line('') // "url : "     // self%url_
+    if (len(self%license_)/=0) text = text // new_line('') // "license : " // self%license_
+    if (len(self%version_)/=0) text = text // new_line('') // "version : " // self%version_
   end procedure
 
   module procedure contains
