@@ -48,16 +48,14 @@ program main
     berkeley_packages => file_t([ &
        string_t("# File Header") &
       ,string_t("#") &
-      ,string_t("") &
       ,formal &
       ,string_t("") &
       ,string_t("# Section Header") &
+      ,julienne &
       ,string_t("") &
       ,assert &
       ,string_t("") &
       ,caffeine &
-      ,string_t("") &
-      ,julienne &
     ]))
   
     ! ______ Test subject ______
@@ -66,17 +64,24 @@ program main
     ! ______ Test ______
     associate( &
            packages => package_index_t(berkeley_packages) &
-      ,  assert_pkg => indexed_package_t(assert) &
-      ,caffeine_pkg => indexed_package_t(caffeine) &
-      ,  formal_pkg => indexed_package_t(formal) &
-      ,julienne_pkg => indexed_package_t(julienne) &
+      ,  assert_package => indexed_package_t(assert) &
+      ,caffeine_package => indexed_package_t(caffeine) &
+      ,  formal_package => indexed_package_t(formal) &
+      ,julienne_package => indexed_package_t(julienne) &
     )
-      print fmt,"  " // check(packages%find(  "assert")  ==   assert_pkg%as_text() // new_line('') // julienne_pkg%as_text() // new_line('')) // " searching on a string that matches two packages"
-      print fmt,"  " // check(packages%find("caffeine")  == caffeine_pkg%as_text() // new_line('')) // " matching the 'caffeine' package index item"
-      print fmt,"  " // check(packages%find(  "formal")  ==   formal_pkg%as_text() // new_line('')) // " matching the 'formal' package index item"
-      print fmt,"  " // check(packages%find("julienne")  == julienne_pkg%as_text() // new_line('')) // " matching the 'julienne' package index item"
-      print fmt,"  " // check(packages%find("numerical") ==   formal_pkg%as_text() // new_line('')) // " finding a package based on category text"
-      print fmt,"  " // check(packages%find("fake")      == "") // " returning zero-length text for a non-existant package search"
+      associate( &
+           assert_text =>   assert_package%as_text() // new_line('') &
+        ,caffeine_text => caffeine_package%as_text() // new_line('') &
+        ,  formal_text =>   formal_package%as_text() // new_line('') &
+        ,julienne_text => julienne_package%as_text() // new_line('') &
+      )
+        print fmt,"  " // check(packages%find("caffeine" ) == caffeine_text) // " finding a package with no optional data"
+        print fmt,"  " // check(packages%find("formal")    ==   formal_text) // " finding a package with all optional data"
+        print fmt,"  " // check(packages%find("julienne")  == julienne_text) // " finding a listed after a section header"
+        print fmt,"  " // check(packages%find("numerical") ==   formal_text) // " finding a package based on category text"
+        print fmt,"  " // check(packages%find("assert")    == julienne_text // assert_text) // " finding two matching packages"
+        print fmt,"  " // check(packages%find("fake")      ==            "") // " returning zero-length text for a missing package"
+      end associate
     end associate
   end associate define_package_index_file_object
 
