@@ -1,0 +1,7 @@
+*.smod
+*.mod
+*.o
+a.out
+build
+*.swp
+doc/html
