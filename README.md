@@ -1,10 +1,8 @@
-# fortran-lang-search
 fpm-search 
 ----------
 
-## Package search utility
-`fpm-search` is a Fortran Package Manager (`fpm`) plugin for searching fortran-lang.org's
-package index.
+## A package search utility
+`fpm-search` is a Fortran Package Manager (`fpm`) plugin that searches fortran-lang.org's package index.
 
 ### Installation and testing
 With the Fortran Package Manager (`fpm`) and a Fortran compiler installed and in your PATH,
