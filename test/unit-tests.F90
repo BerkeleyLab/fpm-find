@@ -1,12 +1,10 @@
 program unit_tests
-  !! Test the fortran-package-search library
+  !! Test the package-search library functions
   use julienne_m, only : file_t, string_t
   use indexed_package_m, only : indexed_package_t
   use package_index_m, only : package_index_t
   implicit none
 
-  integer p
-  
   ! ______ Test data ______
   define_package_index_items: &
   associate( &
@@ -59,9 +57,10 @@ program unit_tests
       ]))
 
       ! ______ Test subject ______
-      print '(a)', "The fpm-search program output"
+      print '(a)', "The package-search program"
 
       ! ______ Tests ______
+      define_index_and_package_entries: &
       associate( &
                  packages => package_index_t(berkeley_packages) &
         ,  assert_package => indexed_package_t(assert) &
@@ -69,29 +68,30 @@ program unit_tests
         ,  formal_package => indexed_package_t(formal) &
         ,julienne_package => indexed_package_t(julienne) &
       )
+        capture_package_entry_text: &
         associate( &
-             assert_text =>   assert_package%as_text() // new_line('') &
-          ,caffeine_text => caffeine_package%as_text() // new_line('') &
-          ,  formal_text =>   formal_package%as_text() // new_line('') &
-          ,julienne_text => julienne_package%as_text() // new_line('') &
+             assert_text =>   assert_package%as_text() &
+          ,caffeine_text => caffeine_package%as_text() &
+          ,  formal_text =>   formal_package%as_text() &
+          ,julienne_text => julienne_package%as_text() &
         )
-          print '(a)',"  " // check(packages%find("caffeine" ) == caffeine_text)// " finding a package with no optional data"
-          print '(a)',"  " // check(packages%find("formal")    ==   formal_text)// " finding a package with all optional data"
-          print '(a)',"  " // check(packages%find("julienne")  == julienne_text)// " finding a listed after a section header"
-          print '(a)',"  " // check(packages%find("numerical") ==   formal_text)// " finding a package based on category text"
-          print '(a)',"  " // check(packages%find("assert")    == julienne_text // assert_text) // " finding two matching packages"
-          print '(a)',"  " // check(packages%find("fake")      ==            "")// " returning zero-length text for a missing package"
-        end associate
-      end associate
+          call report_result(packages%find("caffeine")  == caffeine_text, " finding a package with no optional data")
+          call report_result(packages%find("formal")    ==   formal_text, " finding a package with optional license & version")
+          call report_result(packages%find("julienne")  == julienne_text, " finding a package listed after a section header")
+          call report_result(packages%find("numerical") ==   formal_text, " finding a package based on category text")
+          call report_result(packages%find("fake")      ==            "", " returning zero-length text for a missing package")
+          call report_result(packages%find("assert")    == julienne_text // assert_text, " finding two matching packages")
+          stop ! work around gfortran 13-16 seg faults
+        end associate capture_package_entry_text
+      end associate define_index_and_package_entries
     end associate define_package_index_file_object
   end associate define_package_index_items
-
 contains
 
-  function check(test_condition) result(outcome)
+  subroutine report_result(test_condition, test_description)
     logical, intent(in) :: test_condition
-    character(len=:), allocatable :: outcome
-    outcome =  merge("passes on", "FAILS  on", test_condition)
-  end function
- 
+    character(len=*), intent(in) :: test_description
+    print '(a)', "  " // merge("passes on", "FAILS  on", test_condition)// test_description
+  end subroutine
+
 end program unit_tests

@@ -1,3 +1,5 @@
+#include "fortran-lang-compiler-support.F90"
+
 submodule(package_index_m) package_index_s
   use julienne_m, only : string_t
   implicit none
@@ -18,9 +20,18 @@ contains
       associate(lines => file%lines())
         associate(delimiters => [name_key_line_numbers(lines),size(lines)+1])
           allocate(indexed_packages(size(delimiters)-1))
+#if HAVE_DO_CONCURRENT_TYPE_SPEC_SUPPORT && HAVE_LOCALITY_SPECIFIER_SUPPORT
           do concurrent(integer :: p = 1:size(indexed_packages)) default(none) shared(indexed_packages, lines, delimiters)
             indexed_packages(p) = indexed_package_t(lines(delimiters(p):delimiters(p+1)-1))
           end do
+#else
+          block
+          integer p
+          do concurrent(           p = 1:size(indexed_packages))
+            indexed_packages(p) = indexed_package_t(lines(delimiters(p):delimiters(p+1)-1))
+          end do
+          end block
+#endif
         end associate
       end associate
     end function
@@ -53,24 +64,20 @@ contains
     pure function dash_name_colon(line) result(match)
        character(len=*), intent(in) :: line
        logical match
+       character(len=:), allocatable :: dash_blank_etc, name_etc, colon_etc
 
-       block
-         character(len=:), allocatable :: dash_blank_etc
-         dash_blank_etc = adjustl(line)
-          match = dash_blank_etc(1:2) == "- " 
-          if (.not. match) return
-          block
-            character(len=:), allocatable :: name_etc
-            name_etc = adjustl(dash_blank_etc(len("- ")+1:))
-            match = name_etc(1:4) == "name"
-            if (.not. match) return
-            block
-              character(len=:), allocatable :: colon_etc
-              colon_etc = adjustl(name_etc(len("name")+1:))
-              match = colon_etc(1:1) == ":"
-            end block
-          end block
-       end block
+       dash_blank_etc = adjustl(line)
+       if (len(dash_blank_etc) < 2) then
+         match = .false.
+         return
+       end if
+       match = dash_blank_etc(1:2) == "- "
+       if (.not. match) return
+       name_etc = adjustl(dash_blank_etc(len("- ")+1:))
+       match = name_etc(1:4) == "name"
+       if (.not. match) return
+       colon_etc = adjustl(name_etc(len("name")+1:))
+       match = colon_etc(1:1) == ":"
     end function
 
   end procedure
@@ -91,7 +98,7 @@ contains
     allocate(character(len=0) :: package_list)
 
     do p = 1, size(self%packages_)
-      if (self%packages_(p)%contains(search_string)) package_list = package_list // self%packages_(p)%as_text() // new_line('')
+      if (self%packages_(p)%contains(search_string)) package_list = package_list // self%packages_(p)%as_text()
     end do
 
   end procedure

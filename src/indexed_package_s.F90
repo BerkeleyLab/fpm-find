@@ -1,3 +1,5 @@
+#include "fortran-lang-compiler-support.F90"
+
 submodule(indexed_package_m) indexed_package_s
   implicit none
 
@@ -161,6 +163,7 @@ contains
     if (len(self%url_    )/=0) text = text // new_line('') // "url : "     // self%url_
     if (len(self%license_)/=0) text = text // new_line('') // "license : " // self%license_
     if (len(self%version_)/=0) text = text // new_line('') // "version : " // self%version_
+    text = text // new_line('') // new_line('')
   end procedure
 
   module procedure contains
@@ -183,11 +186,22 @@ contains
       character(len=*), intent(in) :: string
       character(len=len(string))   :: lower_case_string
 
+#if HAVE_DO_CONCURRENT_TYPE_SPEC_SUPPORT && HAVE_LOCALITY_SPECIFIER_SUPPORT
       do concurrent(integer :: i = 1:len(string)) default(none) shared(string, lower_case_string)
         associate(char => iachar(string(i:i)))
           lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
         end associate
       end do
+#else
+      block
+      integer i
+      do concurrent(           i = 1:len(string))
+        associate(char => iachar(string(i:i)))
+          lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
+        end associate
+      end do
+      end block
+#endif
     end function
 
   end procedure

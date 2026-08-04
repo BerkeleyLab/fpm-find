@@ -1,4 +1,4 @@
-program fortran_package_search
+program fpm_search
   use julienne_m, only : file_t, command_line_t
   use package_index_m, only : package_index_t
   implicit none
@@ -40,9 +40,16 @@ program fortran_package_search
     end if
 
     associate(package_index => package_index_t(file_t(index_path // index_file)))
-      print '(a)', package_index%find(search_string)
+      associate(search_results => package_index%find(search_string))
+        if (trim(adjustl(search_results)) == "") then
+          print '(a)',"No packages found."
+          stop ! work around malloc error in gfortran 13-16
+        else
+          print '(a)', new_line('') // search_results
+        end if
+      end associate
     end associate
 
   end block
 
-end program fortran_package_search
+end program fpm_search
