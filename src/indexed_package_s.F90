@@ -1,4 +1,4 @@
-#include "fortran-lang-compiler-support.F90"
+#include "fpm-search-language-support.F90"
 
 submodule(indexed_package_m) indexed_package_s
   implicit none

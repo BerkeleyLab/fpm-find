@@ -1,4 +1,4 @@
-#include "fortran-lang-compiler-support.F90"
+#include "fpm-search-language-support.F90"
 
 submodule(package_index_m) package_index_s
   use julienne_m, only : string_t
