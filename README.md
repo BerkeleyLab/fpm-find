@@ -1,6 +1,3 @@
-Fpm-search
-==========
-
 Fortran package search utilities
 --------------------------------
 This repository contains programs designed to run either as standalone utilities or as
