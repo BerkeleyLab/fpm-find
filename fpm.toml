@@ -1,4 +1,4 @@
-name = "fortran-lang-search"
+name = "fpm-search"
 version = "0.1.0"
 
 [dependencies]
