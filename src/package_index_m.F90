@@ -13,6 +13,7 @@ module package_index_m
   contains
     procedure as_text
     procedure find 
+    procedure url
   end type
 
   interface package_index_t
@@ -41,6 +42,14 @@ module package_index_m
       class(package_index_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
       character(len=:), allocatable :: package_list
+    end function
+
+    pure module function url(self, name) result(package_url)
+      !! Result is a listing of the packages that have entries containing the provided search_string
+      implicit none
+      class(package_index_t), intent(in) :: self
+      character(len=*), intent(in) :: name
+      character(len=:), allocatable :: package_url
     end function
 
   end interface

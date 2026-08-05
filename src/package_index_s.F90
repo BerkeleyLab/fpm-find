@@ -103,4 +103,18 @@ contains
 
   end procedure
 
+  module procedure url
+    integer p
+
+    do p = 1, size(self%packages_)
+      if (self%packages_(p)%name_matches(name)) then
+        package_url = self%packages_(p)%url()
+        return
+      end if
+    end do
+
+    allocate(character(len=0) :: package_url)
+
+  end procedure
+
 end submodule package_index_s

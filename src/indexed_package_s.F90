@@ -1,15 +1,22 @@
 #include "fpm-search-language-support.F90"
+#include "julienne-assert-macros.h"
 
 submodule(indexed_package_m) indexed_package_s
   implicit none
 
 contains
 
+  module procedure name_matches
+    match = lower_case(self%name_) == lower_case(name)
+  end procedure
+
   module procedure construct_from_components
     indexed_package%name_        = name
     indexed_package%description_ = description
     indexed_package%categories_  = categories
     indexed_package%tags_        = tags
+
+    call_julienne_assert(present(github) .or. present(gitlab) .or. present(url))
 
     if (present(github)) then
       indexed_package%github_ = github
@@ -56,7 +63,7 @@ contains
         associate(colon => index(characters, ":"))
           if (colon == 0) error stop "missing key/value separator ':'"
           if (index(characters(1:colon-1), key)/=0)then
-            key_value = characters(colon+1:)
+            key_value = adjustl(characters(colon+1:))
             return
           end if
         end associate
@@ -152,6 +159,18 @@ contains
 
   end procedure
 
+  module procedure url
+    if (len(self%url_) /= 0) then
+      package_url = self%url_
+    else if (len(self%github_) /= 0) then
+      package_url = "https://github.com/" // self%github_
+    else if (len(self%gitlab_) /= 0) then
+      package_url = "https://github.com/" // self%gitlab_
+    else
+      error stop "Requesed package data contains insufficient information to form a URL: " // new_line('') // self%as_text()
+    end if
+  end procedure
+
   module procedure as_text
     text = &
          "- name : "      // self%name_        // new_line('') &
@@ -180,30 +199,28 @@ contains
       ,index(lower_case(self%version_)    , lower_case(search_string)) &
     ])
 
-  contains
+  end procedure
 
-    pure function lower_case(string) result(lower_case_string)
-      character(len=*), intent(in) :: string
-      character(len=len(string))   :: lower_case_string
+  pure function lower_case(string) result(lower_case_string)
+    character(len=*), intent(in) :: string
+    character(len=len(string))   :: lower_case_string
 
 #if HAVE_DO_CONCURRENT_TYPE_SPEC_SUPPORT && HAVE_LOCALITY_SPECIFIER_SUPPORT
-      do concurrent(integer :: i = 1:len(string)) default(none) shared(string, lower_case_string)
-        associate(char => iachar(string(i:i)))
-          lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
-        end associate
-      end do
+    do concurrent(integer :: i = 1:len(string)) default(none) shared(string, lower_case_string)
+      associate(char => iachar(string(i:i)))
+        lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
+      end associate
+    end do
 #else
-      block
-      integer i
-      do concurrent(           i = 1:len(string))
-        associate(char => iachar(string(i:i)))
-          lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
-        end associate
-      end do
-      end block
+    block
+    integer i
+    do concurrent(           i = 1:len(string))
+      associate(char => iachar(string(i:i)))
+        lower_case_string(i:i) = merge(achar(char + (iachar('a') - iachar('A'))), string(i:i), char >= iachar('A') .and. char <= iachar('Z'))
+      end associate
+    end do
+    end block
 #endif
-    end function
-
-  end procedure
+  end function
 
 end submodule indexed_package_s

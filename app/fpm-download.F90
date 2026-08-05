@@ -1,22 +1,22 @@
-program fpm_search
+program fpm_download
   use julienne_m, only : file_t, command_line_t
   use package_index_m, only : package_index_t
   implicit none
 
   type(command_line_t) command_line
-  character(len=:), allocatable :: search_string
+  character(len=:), allocatable :: name
 
-  search_string = command_line%flag_value("--find")
+  name = command_line%flag_value("--package")
 
-  if (len(search_string)==0 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
-    stop                             new_line('') // new_line('') &
-      // 'Usage:'                 // new_line('') // new_line('') &
-      // '  fpm run fpm-search \'                            // new_line('') &
-      // '    --compiler <compiler-name> \'       // new_line('') &
-      // '    --profile release \'                // new_line('') &
-      // '    -- [--help|-h] | [--find <string>]' // new_line('') // new_line('') &
+  if (len(name)==0 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
+    stop                              new_line('') // new_line('') &
+      // 'Usage:'                  // new_line('') // new_line('') &
+      // '  fpm run fpm-download \'                    // new_line('') &
+      // '    --compiler <compiler-name> \'        // new_line('') &
+      // '    --profile release \'                 // new_line('') &
+      // '    -- [--help|-h] | [--package <name>]' // new_line('') // new_line('') &
       // 'where pipe-separated square brackets indicate alternative optional arguments' // new_line('') &
-      // 'and angular brackets indicate user input values.'       // new_line('')
+      // 'and angular brackets indicate user input values.' // new_line('')
   end if
 
   block
@@ -40,16 +40,20 @@ program fpm_search
     end if
 
     associate(package_index => package_index_t(file_t(index_path // index_file)))
-      associate(search_results => package_index%find(search_string))
-        if (trim(adjustl(search_results)) == "") then
-          print '(a)',"No packages found."
+      associate(url => package_index%url(name))
+        if (len(url) == 0) then
+          print '(a)',"No package named '" // name // "' found."
           stop ! work around malloc error in gfortran 13-16
         else
-          print '(a)', new_line('') // search_results
+          call execute_command_line( &
+             command  = "git clone " // url // " build/dependencies/" // name &
+            ,wait     = .true. &
+            ,exitstat = exit_status &
+          )
         end if
       end associate
     end associate
 
   end block
 
-end program fpm_search
+end program fpm_download
