@@ -13,6 +13,8 @@ module indexed_package_m
     character(len=:), allocatable :: github_, gitlab_, url_ ! optional (zero length if not present)
     character(len=:), allocatable :: license_, version_     ! optional (zero length if not present)
   contains
+    procedure name_matches
+    procedure url
     procedure as_text
     procedure contains
   end type
@@ -46,6 +48,19 @@ module indexed_package_m
   end interface
 
   interface
+
+    pure module function url(self) result(package_url)
+      implicit none
+      class(indexed_package_t), intent(in) :: self
+      character(len=:), allocatable :: package_url
+    end function
+
+    pure module function name_matches(self, name) result(match)
+      implicit none
+      class(indexed_package_t), intent(in) :: self
+      character(len=*), intent(in) :: name
+      logical match
+    end function
 
     pure module function as_text(self) result(text)
       implicit none
