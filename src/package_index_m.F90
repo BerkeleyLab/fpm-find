@@ -1,3 +1,6 @@
+! Copyright (c) 2026, The Regents of the University of California
+! Terms of use are as specified in LICENSE.txt
+
 module package_index_m
   use julienne_m, only : file_t
   use indexed_package_m, only : indexed_package_t

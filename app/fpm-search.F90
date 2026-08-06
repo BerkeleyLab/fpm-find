@@ -1,3 +1,6 @@
+! Copyright (c) 2026, The Regents of the University of California
+! Terms of use are as specified in LICENSE.txt
+
 program fpm_search
   use julienne_m, only : file_t, command_line_t
   use package_index_m, only : package_index_t

@@ -1,3 +1,6 @@
+! Copyright (c) 2026, The Regents of the University of California
+! Terms of use are as specified in LICENSE.txt
+
 program unit_tests
   !! Test the package-search library functions
   use julienne_m, only : file_t, string_t
