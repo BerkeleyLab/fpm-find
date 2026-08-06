@@ -168,7 +168,7 @@ contains
     else if (len(self%github_) /= 0) then
       package_url = "https://github.com/" // self%github_
     else if (len(self%gitlab_) /= 0) then
-      package_url = "https://github.com/" // self%gitlab_
+      package_url = "https://gitlab.com/" // self%gitlab_
     else
       error stop "Requesed package data contains insufficient information to form a URL: " // new_line('') // self%as_text()
     end if
