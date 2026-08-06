@@ -106,9 +106,9 @@ To contribute code, please submit a [pull request] from a fork of .
 
 Funding
 -------
-Fpm-search was developed on funding from the U.S. Department of Energy, Office of Science,
+Fpm-search was developed with funding from the U.S. Department of Energy, Office of Science,
 Office of Advanced Scientific Computing Research via the Next-Generation Scientific
-Software Technologies (NGSST) programs under Contract No. DE-AC02-05CH11231.
+Software Technologies (NGSST) program under Contract No. DE-AC02-05CH11231.
 
 [Fortran Package Manager]: https://github.com/fortran-lang/fpm
 [issue]: https://github.com/berkeleylab/fpm-search/issues
