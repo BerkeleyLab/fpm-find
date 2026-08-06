@@ -5,6 +5,7 @@ program unit_tests
   !! Test the package-search library functions
   use julienne_m, only : file_t, string_t
   use fpm_search_m, only : indexed_package_t, package_index_t
+  use test_utilities_m, only : test, fmt
   implicit none
 
   ! ______ Test data ______
@@ -59,7 +60,7 @@ program unit_tests
       ]))
 
       ! ______ Test subject ______
-      print '(a)', "The package-search program"
+      print '(a)', new_line('') // "The 'search --find' feature"
 
       ! ______ Tests ______
       define_index_and_package_entries: &
@@ -89,7 +90,7 @@ program unit_tests
               print fmt(tests), "______ ", tests - passes, " of ", tests, " tests failed. ______"
               error stop
             else
-              print fmt(tests), "All ", tests, " tests passed."
+              print fmt(tests), "All ", tests, " tests passed." // new_line('')
 #ifdef __GFORTRAN__
               stop ! work around gfortran 13-16 seg faults
 #endif
@@ -99,32 +100,5 @@ program unit_tests
       end associate define_index_and_package_entries
     end associate define_package_index_file_object
   end associate define_package_index_items
-contains
-
-  subroutine test(test_condition, test_description, num_tests, num_passes)
-    logical, intent(in) :: test_condition
-    integer, intent(inout) :: num_tests, num_passes
-    character(len=*), intent(in) :: test_description
-    print '(a)', "  " // merge("passes on", "FAILS  on", test_condition)// test_description
-    num_tests = num_tests + 1
-    num_passes = num_passes + merge(1, 0, test_condition)
-  end subroutine
-
-  pure function fmt(num_tests)
-    integer, intent(in) :: num_tests
-    character(len=:), allocatable :: fmt
-    select case(num_tests)
-    case(0:9)
-      fmt = "(*(a,i1))"
-    case(10-99)
-      fmt = "(*(a,i2))"
-    case(100-999)
-      fmt = "(*(a,i3))"
-    case(1000-9999)
-      fmt = "(*(a,i4))"
-    case default
-      fmt = "(*(a,i9))"
-    end select
-  end function
 
 end program unit_tests

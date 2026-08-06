@@ -3,7 +3,7 @@
 
 module fpm_search_m
   !! Fpm_search public entities
-  implicit none
   use indexed_package_m, only : indexed_package_t
   use package_index_m, only : package_index_t
+  implicit none
 end module fpm_search_m
