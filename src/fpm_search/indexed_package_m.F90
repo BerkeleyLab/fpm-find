@@ -2,11 +2,12 @@
 ! Terms of use are as specified in LICENSE.txt
 
 module indexed_package_m
+  !! Define an abstraction for the fortran-lang package-index packages
   use iso_c_binding, only : c_int
   use julienne_m, only : string_t
   implicit none
 
-  !private
+  private
   public :: indexed_package_t
 
   type indexed_package_t
@@ -53,12 +54,14 @@ module indexed_package_m
   interface
 
     pure module function url(self) result(package_url)
+      !! Result is the package Uniform Resource Locater (URL)
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: package_url
     end function
 
     pure module function name_matches(self, name) result(match)
+      !! Result is true if the passed name matches the package's name; false otherwise
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=*), intent(in) :: name
@@ -66,12 +69,14 @@ module indexed_package_m
     end function
 
     pure module function as_text(self) result(text)
+      !! Result is a new-line-separated text rendering of the package's entries.
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: text
     end function
 
     pure module function contains(self, search_string) result(match)
+      !! Result is true if any of the package's entries contain search_string as a substring; false otherwise
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=*), intent(in) :: search_string

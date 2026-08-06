@@ -3,7 +3,7 @@ Fpm-search
 
 Fortran package search utilities
 --------------------------------
-This repository contains programs designed to run either as standalone utilities or as
+This repository contains programs designed to run either as stand-alone utilities or as
 plugins for the [Fortran Package Manager] (`fpm`):
 
 - `fpm-search` searches fortran-lang.org's package index and
@@ -24,18 +24,18 @@ given search string in their package-index entry by running the command
 ```
 fpm search <search-string>
 ```
-which should return package entries that containing the case-insenstive
-substring `<search-string>`, where angular-bracketed text denates user input.
-To see additional usage informaiton, run `fpm search --help` (or use `-h`).
+which should return package entries that containing the case-insensitive
+substring `<search-string>`, where angular-bracketed text denotes user input.
+To see additional usage information, run `fpm search --help` (or use `-h`).
 
 To download a package listed in the fortran-lang package index, run the command
 ```
 fpm download <package-name>
 ```
 where the package name is case-insensitive and defaults to `./build/dependencies`.
-To see additional usage informaiton, run `fpm download --help` (or `-h`).
+To see additional usage information, run `fpm download --help` (or `-h`).
 
-### Standalone use
+### Stand-alone use
 If `fpm` is not in your `PATH`, but `fpm-search` and `fpm-download` are, run the latter
 programs directory using hyphens, replacing `fpm search` and `fpm download` with
 `fpm-search` and `fpm-download`.
