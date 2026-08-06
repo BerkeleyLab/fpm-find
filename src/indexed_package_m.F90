@@ -1,3 +1,6 @@
+! Copyright (c) 2026, The Regents of the University of California
+! Terms of use are as specified in LICENSE.txt
+
 module indexed_package_m
   use iso_c_binding, only : c_int
   use julienne_m, only : string_t
