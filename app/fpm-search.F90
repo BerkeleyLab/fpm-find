@@ -3,7 +3,7 @@
 
 program fpm_search
   use julienne_m, only : file_t, command_line_t
-  use package_index_m, only : package_index_t
+  use fpm_search_m, only : package_index_t
   implicit none
 
   type(command_line_t) command_line

@@ -4,8 +4,7 @@
 program unit_tests
   !! Test the package-search library functions
   use julienne_m, only : file_t, string_t
-  use indexed_package_m, only : indexed_package_t
-  use package_index_m, only : package_index_t
+  use fpm_search_m, only : indexed_package_t, package_index_t
   implicit none
 
   ! ______ Test data ______
