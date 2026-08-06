@@ -2,6 +2,7 @@
 ! Terms of use are as specified in LICENSE.txt
 
 program fpm_download
+  !! fpm plugin for downloading software listed in the fortran-lang package index
   use julienne_m, only : file_t, command_line_t
   use fpm_search_m, only : package_index_t
   implicit none

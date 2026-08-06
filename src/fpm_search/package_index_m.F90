@@ -2,6 +2,7 @@
 ! Terms of use are as specified in LICENSE.txt
 
 module package_index_m
+  !! Define an abstraction for the fortran-lang package index
   use julienne_m, only : file_t
   use indexed_package_m, only : indexed_package_t
   implicit none
@@ -48,7 +49,7 @@ module package_index_m
     end function
 
     pure module function url(self, name) result(package_url)
-      !! Result is a listing of the packages that have entries containing the provided search_string
+      !! Result is the Uniform Resource Locator (URL) of the named pacakge
       implicit none
       class(package_index_t), intent(in) :: self
       character(len=*), intent(in) :: name
