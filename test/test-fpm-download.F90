@@ -1,12 +1,17 @@
 ! Copyright (c) 2026, The Regents of the University of California
 ! Terms of use are as specified in LICENSE.txt
 
-program unit_tests
-  !! Test the package-search library functions
+module test_fpm_download_m
   use julienne_m, only : file_t, string_t
   use fpm_search_m, only : indexed_package_t, package_index_t
   use test_utilities_m, only : test, fmt
   implicit none
+
+contains
+
+subroutine test_fpm_download(tests, passes)
+  !! Test the package-search library functions
+  integer, intent(inout) :: tests, passes
 
   ! ______ Test data ______
   define_package_index_items: &
@@ -64,33 +69,30 @@ program unit_tests
           ,findent_url => findent_package%url() &
         )
           block
-            integer :: tests = 0, passes = 0
+            integer :: url_tests = 0, url_passes = 0
 
             call test( &
               packages%url("pFUnit")  == "https://github.com/Goddard-Fortran-Ecosystem/pFUnit", &
-              " forming a correct GitHub URL", tests, passes &
+              " forming a correct GitHub URL", url_tests, url_passes &
             )
             call test( &
               packages%url("veggies") == "https://gitlab.com/everythingfunctional/veggies", &
-              " forming a correct GitLab URL", tests, passes &
+              " forming a correct GitLab URL", url_tests, url_passes &
             )
             call test( &
               packages%url("findent") == "https://sourceforge.net/projects/findent/", &
-              " getting a correct sourceforge URL", tests, passes)
+              " getting a correct sourceforge URL", url_tests, url_passes)
 
-            if (passes /= tests) then
-              print fmt(tests), "______ ", tests - passes, " of ", tests, " tests failed. ______"
-              error stop
-            else
-              print fmt(tests), "All ", tests, " tests passed." // new_line('')
-#ifdef __GFORTRAN__
-              stop ! work around gfortran 13-16 seg faults
-#endif
-            end if
+              print fmt(tests), "______ ", url_passes, " of ", url_tests, " tests passed. ______"
+
+              tests  = tests  + url_tests
+              passes = passes + url_passes
           end block
         end associate capture_package_entry_text
       end associate define_index_and_package_entries
     end associate define_package_index_file_object
   end associate define_package_index_items
 
-end program unit_tests
+end subroutine test_fpm_download
+
+end module test_fpm_download_m

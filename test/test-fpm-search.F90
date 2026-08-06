@@ -1,12 +1,17 @@
 ! Copyright (c) 2026, The Regents of the University of California
 ! Terms of use are as specified in LICENSE.txt
 
-program unit_tests
+module test_fpm_search_m
   !! Test the package-search library functions
   use julienne_m, only : file_t, string_t
   use fpm_search_m, only : indexed_package_t, package_index_t
   use test_utilities_m, only : test, fmt
   implicit none
+
+contains
+
+subroutine test_fpm_search(tests, passes)
+  integer, intent(inout) :: tests, passes
 
   ! ______ Test data ______
   define_package_index_items: &
@@ -79,26 +84,31 @@ program unit_tests
           ,julienne_txt => julienne_package%as_text() &
         )
           block
-            integer :: tests = 0, passes = 0
-            call test(packages%find("caffeine")  == caffeine_txt, " finding a package with no optional data", tests, passes)
-            call test(packages%find("formal")    ==   formal_txt, " finding a package with optional license/version", tests, passes)
-            call test(packages%find("julienne")  == julienne_txt, " finding a package listed after a section header", tests, passes)
-            call test(packages%find("numerical") ==   formal_txt, " finding a package based on category text", tests, passes)
-            call test(packages%find("fake")      ==            "", " returning blank text for a missing package", tests, passes)
-            call test(packages%find("assert")    == julienne_txt // assert_txt, " finding two matching packages", tests, passes)
-            if (passes /= tests) then
-              print fmt(tests), "______ ", tests - passes, " of ", tests, " tests failed. ______"
-              error stop
-            else
-              print fmt(tests), "All ", tests, " tests passed." // new_line('')
-#ifdef __GFORTRAN__
-              stop ! work around gfortran 13-16 seg faults
-#endif
-            end if
+            integer :: search_tests = 0, search_passes = 0
+
+            call test(packages%find("caffeine")  == caffeine_txt, " finding a package with no optional data"         &
+              ,search_tests, search_passes)
+            call test(packages%find("formal")    ==   formal_txt, " finding a package with optional license/version" &
+              ,search_tests, search_passes)
+            call test(packages%find("julienne")  == julienne_txt, " finding a package listed after a section header" &
+              ,search_tests, search_passes)
+            call test(packages%find("numerical") ==   formal_txt, " finding a package based on category text"        &
+              ,search_tests, search_passes)
+            call test(packages%find("fake")      ==            "", " returning blank text for a missing package"     &
+              ,search_tests, search_passes)
+            call test(packages%find("assert")    == julienne_txt // assert_txt, " finding two matching packages"     &
+              ,search_tests, search_passes)
+
+            print fmt(tests), "______ ", search_passes, " of ", search_tests, " tests passed. ______"
+
+            tests  = tests  + search_tests
+            passes = passes + search_passes
           end block
         end associate capture_package_entry_text
       end associate define_index_and_package_entries
     end associate define_package_index_file_object
   end associate define_package_index_items
 
-end program unit_tests
+end subroutine test_fpm_search
+
+end module test_fpm_search_m
