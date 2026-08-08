@@ -8,51 +8,66 @@ program fpm_search
   implicit none
 
   type(command_line_t) command_line
-  character(len=:), allocatable :: search_string
 
-  search_string = command_line%flag_value("--find")
-
-  if (len(search_string)==0 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
-    stop                             new_line('') // new_line('') &
-      // 'Usage:'                 // new_line('') // new_line('') &
-      // '  fpm run fpm-search \'                            // new_line('') &
-      // '    --compiler <compiler-name> \'       // new_line('') &
-      // '    --profile release \'                // new_line('') &
-      // '    -- [--help|-h] | [--find <string>]' // new_line('') // new_line('') &
-      // 'where pipe-separated square brackets indicate alternative optional arguments' // new_line('') &
-      // 'and angular brackets indicate user input values.'       // new_line('')
+  if (command_argument_count() < 1 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
+    stop                                                         new_line('') // new_line('') &
+      // 'Usage: fpm find [<search-string>] | [--help|-h]'    // new_line('') // new_line('') &
+      // 'where pipe-separated square brackets indicate alternative optional' // new_line('') &
+      // 'arguments and angular brackets indicate user input values.'         // new_line('')
   end if
 
   block
-    character(len=*), parameter :: index_url_base = "https://raw.githubusercontent.com/fortran-lang/webpage/refs/heads/main/data/"
-    character(len=*), parameter :: index_path = "build/"
-    character(len=*), parameter :: index_file = "package_index.yml"
-    integer exit_status
+    character(len=*), parameter :: url_base = "https://raw.githubusercontent.com/fortran-lang/webpage/refs/heads/main/data"
+    character(len=*), parameter :: infix = ".local/share/fpm-finder"
+    character(len=*), parameter :: file_name = "package_index.yml"
+    character(len=:), allocatable :: search_string, default_prefix
+    integer exit_status, search_string_length, prefix_length
 
-    call execute_command_line( &
-      command = "curl --silent -L " // index_url_base // index_file // " > " // index_path // index_file, &
-      wait = .true., &
-      exitstat = exit_status &
-    )
+    call get_environment_variable(name="HOME", length = prefix_length)
+    allocate( character(len=prefix_length)           :: default_prefix)
+    call get_environment_variable(name="HOME", value  = default_prefix)
 
-    if (exit_status /= 0) then
+    define_file_path: &
+    associate(file_path =>  default_prefix // "/" // infix)
+
       call execute_command_line( &
-         command  = "wget --quiet -O " // index_path // index_file // " " // index_url_base // index_file &
-        ,wait     = .true. &
+         command = "mkdir -p " // file_path &
+        ,wait = .true. &
         ,exitstat = exit_status &
       )
-    end if
+      call execute_command_line( &
+         command = "curl --silent -L " // url_base // "/" // file_name // " > "  // file_path // "/" // file_name &
+        ,wait = .true. &
+        ,exitstat = exit_status &
+      )
+      if (exit_status /= 0) then
+        call execute_command_line( &
+           command  = "wget --quiet " //  url_base // "/" // file_name // " -O " // file_path // "/" // file_name &
+          ,wait     = .true. &
+          ,exitstat = exit_status &
+        )
+      end if
 
-    associate(package_index => package_index_t(file_t(index_path // index_file)))
-      associate(search_results => package_index%find(search_string))
-        if (trim(adjustl(search_results)) == "") then
-          print '(a)',"No packages found."
-          stop ! work around malloc error in gfortran 13-16
-        else
-          print '(a)', new_line('') // search_results
-        end if
+      call get_command_argument(number=1, length=search_string_length)
+      allocate(character(len=search_string_length) :: search_string)
+      call get_command_argument(number=1, value=search_string)
+
+      associate(package_index => package_index_t(file_t(file_path // "/" // file_name)))
+
+        associate(search_results => package_index%find(search_string))
+
+          if (trim(adjustl(search_results)) == "") then
+            print '(a)',"No packages found."
+            stop ! work around malloc error in gfortran 13-16
+          else
+            print '(a)', new_line('') // search_results
+          end if
+
+        end associate
+
       end associate
-    end associate
+
+    end associate define_file_path
 
   end block
 
