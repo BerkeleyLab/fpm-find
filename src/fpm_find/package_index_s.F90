@@ -98,10 +98,10 @@ contains
   module procedure find
     integer p
 
-    allocate(character(len=0) :: package_list)
+    allocate(package_list(0))
 
     do p = 1, size(self%packages_)
-      if (self%packages_(p)%contains(search_string)) package_list = package_list // self%packages_(p)%as_text()
+      if (self%packages_(p)%contains(search_string)) package_list = [package_list, self%packages_(p)]
     end do
 
   end procedure
