@@ -10,12 +10,18 @@ program fpm_find
   type(command_line_t) command_line
 
   if (command_argument_count() < 1 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
-    stop                                 new_line('') // new_line('') &
-      // 'Usage:'                     // new_line('') // new_line('') &
-      // '  fpm find --help|-h'       // new_line('') &
-      // '  fpm find <search-string>' // new_line('') // new_line('') &
-      // 'where pipe-separated square brackets indicate alternative optional' // new_line('') &
-      // 'arguments and angular brackets indicate user input values.'         // new_line('')
+    stop                                                                                new_line('') &
+      // ''                                                                          // new_line('') &
+      // 'Usage:'                                                                    // new_line('') &
+      // ''                                                                          // new_line('') &
+      // '  fpm find [--help|-h]'                                                    // new_line('') &
+      // '  fpm find <search-string> [--case|-c]'                                    // new_line('') &
+      // '  fpm find [--name|-n] <search-string> [--case|-c]'                        // new_line('') &
+      // '  fpm find [--url|-u] <search-string> [--case|-c]'                         // new_line('') &
+      // ''                                                                          // new_line('') &
+      // 'where square brackets surround pipe-separated, optional, equivalent'       // new_line('') &
+      // 'alternatives and angular brackets indicate user input values.  Please see' // new_line('') &
+      // 'the README.md file for more detailed explanations of the above arguments.' // new_line('')
   end if
 
   block
