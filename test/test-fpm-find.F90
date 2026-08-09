@@ -1,16 +1,16 @@
 ! Copyright (c) 2026, The Regents of the University of California
 ! Terms of use are as specified in LICENSE.txt
 
-module test_fpm_search_m
-  !! Test the package-search library functions
+module test_fpm_find_m
+  !! Test the package-find library functions
   use julienne_m, only : file_t, string_t
-  use fpm_search_m, only : indexed_package_t, package_index_t
+  use fpm_find_m, only : indexed_package_t, package_index_t
   use test_utilities_m, only : test, fmt
   implicit none
 
 contains
 
-subroutine test_fpm_search(tests, passes)
+subroutine test_fpm_find(tests, passes)
   integer, intent(inout) :: tests, passes
 
   ! ______ Test data ______
@@ -65,7 +65,7 @@ subroutine test_fpm_search(tests, passes)
       ]))
 
       ! ______ Test subject ______
-      print '(a)', new_line('') // "The 'search --find' feature"
+      print '(a)', new_line('') // "fpm-find"
 
       ! ______ Tests ______
       define_index_and_package_entries: &
@@ -84,31 +84,31 @@ subroutine test_fpm_search(tests, passes)
           ,julienne_txt => julienne_package%as_text() &
         )
           block
-            integer :: search_tests = 0, search_passes = 0
+            integer :: find_tests = 0, find_passes = 0
 
             call test(packages%find("caffeine")  == caffeine_txt, " finding a package with no optional data"         &
-              ,search_tests, search_passes)
+              ,find_tests, find_passes)
             call test(packages%find("formal")    ==   formal_txt, " finding a package with optional license/version" &
-              ,search_tests, search_passes)
+              ,find_tests, find_passes)
             call test(packages%find("julienne")  == julienne_txt, " finding a package listed after a section header" &
-              ,search_tests, search_passes)
+              ,find_tests, find_passes)
             call test(packages%find("numerical") ==   formal_txt, " finding a package based on category text"        &
-              ,search_tests, search_passes)
+              ,find_tests, find_passes)
             call test(packages%find("fake")      ==            "", " returning blank text for a missing package"     &
-              ,search_tests, search_passes)
+              ,find_tests, find_passes)
             call test(packages%find("assert")    == julienne_txt // assert_txt, " finding two matching packages"     &
-              ,search_tests, search_passes)
+              ,find_tests, find_passes)
 
-            print fmt(tests), "______ ", search_passes, " of ", search_tests, " tests passed. ______"
+            print fmt(tests), "______ ", find_passes, " of ", find_tests, " tests passed. ______"
 
-            tests  = tests  + search_tests
-            passes = passes + search_passes
+            tests  = tests  + find_tests
+            passes = passes + find_passes
           end block
         end associate capture_package_entry_text
       end associate define_index_and_package_entries
     end associate define_package_index_file_object
   end associate define_package_index_items
 
-end subroutine test_fpm_search
+end subroutine test_fpm_find
 
-end module test_fpm_search_m
+end module test_fpm_find_m
