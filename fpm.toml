@@ -1,4 +1,4 @@
-name = "fpm-search"
+name = "fpm-find"
 version = "0.1.0"
 
 [dependencies]
