@@ -60,13 +60,16 @@ program fpm_find
       call get_command_argument(number=1, value=search_string)
 
       associate(package_index  => package_index_t(file_t(file_path // "/" // file_name)))
-        associate(search_results => package_index%find(search_string))
-          if (trim(adjustl(search_results)) == "") then
-            print '(a)',"No packages found."
-            stop ! work around malloc error in gfortran 13-16
-          else
-            print '(a)', new_line('') // search_results
-          end if
+        associate(matching_packages => package_index%find(search_string))
+          if (size(matching_packages) == 0) print '(a)', "No packages found."
+          block
+            integer p
+            print *
+            do p = 1, size(matching_packages)
+              print '(a)', matching_packages(p)%as_text()
+            end do
+          end block
+          stop ! work around malloc error in gfortran 13-16
         end associate
       end associate
     end associate define_file_path

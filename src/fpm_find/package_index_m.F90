@@ -45,7 +45,7 @@ module package_index_m
       implicit none
       class(package_index_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
-      character(len=:), allocatable :: package_list
+      type(indexed_package_t), allocatable :: package_list(:)
     end function
 
     pure module function url(self, name) result(package_url)
