@@ -34,14 +34,14 @@ module indexed_package_m
     end function
 
     pure module function construct_from_strings(lines) result(indexed_package)
-      !! Construct new indexed_package_t object from file lines
+      !! Construct new indexed_package_t object from file lines passed as an array of string_t objects
       implicit none
       type(string_t), intent(in) :: lines(:)
       type(indexed_package_t) indexed_package 
     end function
 
     pure module function construct_from_characters(new_line_separated) result(indexed_package)
-      !! Construct new indexed_package_t object from file lines
+      !! Construct new indexed_package_t object from file lines passed as characters separated by new_line('')
       implicit none
       character(len=*), intent(in) :: new_line_separated
       type(indexed_package_t) indexed_package 
@@ -52,21 +52,23 @@ module indexed_package_m
   interface
 
     pure module function url(self) result(package_url)
-      !! Result is the package Uniform Resource Locater (URL)
+      !! Result is self's Uniform Resource Locater (URL)
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: package_url
     end function
 
     pure module function as_text(self) result(text)
-      !! Result is a new-line-separated text rendering of the package's entries.
+      !! Result is a new-line-separated text rendering of self's entries.
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: text
     end function
 
     pure module function contains(self, search_string, search_name, search_url, case_sensitive) result(match)
-      !! Result is true if any of the package's entries contain search_string as a substring; false otherwise
+      !! Result is true if any of the package's entries contain search_string as a substring; false otherwise.
+      !! search_name and search_url restrict the search to the package name or URL of the union of the two.
+      !! case_sensitive toggles case sensitivity
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
