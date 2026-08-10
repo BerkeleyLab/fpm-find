@@ -40,11 +40,12 @@ module package_index_m
       character(len=:), allocatable :: index_as_text
     end function
 
-    pure module function find(self, search_string) result(package_list)
+    pure module function find(self, search_string, search_name, search_url, case_sensitive) result(package_list)
       !! Result is a listing of the packages that have entries containing the provided search_string
       implicit none
       class(package_index_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
+      logical, intent(in) :: search_name, search_url, case_sensitive
       type(indexed_package_t), allocatable :: package_list(:)
     end function
 

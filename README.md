@@ -16,7 +16,7 @@ With `fpm` installed on macOS, Linux, or Windows Subsystem for Linux, and with
 your present working directory set to any directory inside the `fpm-find` source
 tree, enter the following command at a command line in a terminal window:
 ```
-fpm install
+fpm install --compiler <compiler-name> --profile release
 ```
 For help with customizing aspects of your installation, such as the installation
 path, run `fpm install --help` or `fpm --help` (or replace `--help `with `-h`).
@@ -42,28 +42,27 @@ With `fpm` and `fpm-find` in your `PATH`, search for information about packages
 that have a given string in their package-index entry by running a command of the
 following form:
 ```
-fpm find <search-string>
+fpm find <search-string> [--url|-u] [--name|-n] [--case|-c]
 ```
-where angular-bracketed text denotes user input.
+where angular brackets demarcate user input, square brackets indicate optional
+arguments, and pipes (`|`) separate equivalent alternatives.  The table below
+provides more detailed explanations.
 
-To search for matches only in specific information categories, pass the category
-name as explained in the `#`-prefixed comments below:
-```
-fpm find [--url|-u] <search-string> # search only packages' Uniform Resource Locator (URLs)
-fpm find [--name|-n] <search-string> # search only packages' names
-```
-where square brackets surround pipe-separated, optional, equivalent alternatives.
-Add the `--case` flag to make a search case-sensitive.
+Flag    |Shortcut|Effect
+--------|--------|------------------------------------------------------------------
+`--url `| `-u`   |Search only package URLs and other categories specified by a flag
+`--name`| `-n`   |Search only package names and other categories specified by a flag
+`--case`| `-c`   |Make the search case-sensitive
 
 ### Stand-alone use
 If `fpm` is not in your `PATH` but `fpm-find` is, replace `fpm find` with
-`fpm-find` in each of the above commands.
+`fpm-find` in any of the above commands.
 
 Example
 --------
 As of this writing, the command
 ```
-fpm search --find julienne
+fpm find --find julienne
 ```
 opens `build/package_index.yml`, if present, and returns
 ```
@@ -90,9 +89,10 @@ Testing
 To test `fpm-find`, issue a command similar to the following one with your
 present working directory set to anywhere inside the `fpm-find` source tree:
 ```
-fpm test
+fpm test --compiler <compiler-name> --profile release
 ```
-The following example command works with LLVM `flang` versions 20 or higher:
+Include additional`fpm` flags as necessary.  For example, issue the following
+command with LLVM `flang` versions 20 or higher:
 ```
 fpm test --compiler flang --profile release
 ```
