@@ -9,10 +9,6 @@ submodule(indexed_package_m) indexed_package_s
 
 contains
 
-  module procedure name_matches
-    match = lower_case(self%name_) == lower_case(name)
-  end procedure
-
   module procedure construct_from_components
     indexed_package%name_        = name
     indexed_package%description_ = description

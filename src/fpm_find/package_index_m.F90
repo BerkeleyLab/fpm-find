@@ -15,9 +15,7 @@ module package_index_m
     private
     type(indexed_package_t), allocatable :: packages_(:)
   contains
-    procedure as_text
     procedure find 
-    procedure url
   end type
 
   interface package_index_t
@@ -33,13 +31,6 @@ module package_index_m
 
   interface
  
-    pure module function as_text(self) result(index_as_text)
-      !! Result is a printable listing of the full index of packages
-      implicit none
-      class(package_index_t), intent(in) :: self
-      character(len=:), allocatable :: index_as_text
-    end function
-
     pure module function find(self, search_string, search_name, search_url, case_sensitive) result(package_list)
       !! Result is a listing of the packages that have entries containing the provided search_string
       implicit none
@@ -47,14 +38,6 @@ module package_index_m
       character(len=*), intent(in) :: search_string
       logical, intent(in) :: search_name, search_url, case_sensitive
       type(indexed_package_t), allocatable :: package_list(:)
-    end function
-
-    pure module function url(self, name) result(package_url)
-      !! Result is the Uniform Resource Locator (URL) of the named pacakge
-      implicit none
-      class(package_index_t), intent(in) :: self
-      character(len=*), intent(in) :: name
-      character(len=:), allocatable :: package_url
     end function
 
   end interface
