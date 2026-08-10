@@ -180,28 +180,41 @@ contains
       // "description : " // self%description_ // new_line('') &
       // "categories : "  // self%categories_  // new_line('') &
       // "tags : "        // self%tags_
-    if (len(self%github_ )/=0) text = text // new_line('') // "github : "  // self%github_
-    if (len(self%gitlab_ )/=0) text = text // new_line('') // "gitlab : "  // self%gitlab_
-    if (len(self%url_    )/=0) text = text // new_line('') // "url : "     // self%url_
+
+    if (len(self%github_ )/=0) then
+      text = text // new_line('') // "url : " // self%url()
+    else if (len(self%gitlab_ )/=0) then
+      text = text // new_line('') // "url : " // self%url()
+    else if (len(self%url_    )/=0) then
+      text = text // new_line('') // "url : " // self%url_
+    else
+      text = text // new_line('') // "url : (insufficient information in package_index.yml)"
+    end if
+
     if (len(self%license_)/=0) text = text // new_line('') // "license : " // self%license_
     if (len(self%version_)/=0) text = text // new_line('') // "version : " // self%version_
     text = text // new_line('') // new_line('')
   end procedure
 
   module procedure contains
+    
+    character(len=:), allocatable :: search_subject
 
-    match = any(0 /= [ &
-       index(lower_case(self%name_)       , lower_case(search_string)) &
-      ,index(lower_case(self%description_), lower_case(search_string)) &
-      ,index(lower_case(self%categories_) , lower_case(search_string)) &
-      ,index(lower_case(self%tags_)       , lower_case(search_string)) &
-      ,index(lower_case(self%github_)     , lower_case(search_string)) &
-      ,index(lower_case(self%gitlab_)     , lower_case(search_string)) &
-      ,index(lower_case(self%url_)        , lower_case(search_string)) &
-      ,index(lower_case(self%license_)    , lower_case(search_string)) &
-      ,index(lower_case(self%version_)    , lower_case(search_string)) &
-    ])
+    allocate(character(len=0) :: search_subject)
 
+    if (search_name .or. (.not. search_url )) search_subject = search_subject // self%name_
+    if (search_url  .or. (.not. search_name)) search_subject = search_subject // self%url()
+
+    if (.not. any([search_name, search_url])) &
+      search_subject = search_subject &
+        // self%description_ // self%categories_ // self%tags_ // self%github_ // self%gitlab_ // self%license_ // self%version_
+
+    if (case_sensitive) then
+      match = index(search_subject, search_string) /= 0
+    else
+      match = index(lower_case(search_subject), lower_case(search_string)) /= 0
+    end if
+       
   end procedure
 
   pure function lower_case(string) result(lower_case_string)

@@ -3,7 +3,7 @@
 
 program fpm_find
   !! fpm plugin for searching the fortran-lang package index
-  use julienne_m, only : file_t, command_line_t
+  use julienne_m, only : file_t, command_line_t, string_t
   use fpm_find_m, only : package_index_t
   implicit none
 
@@ -15,13 +15,11 @@ program fpm_find
       // 'Usage:'                                                                    // new_line('') &
       // ''                                                                          // new_line('') &
       // '  fpm find [--help|-h]'                                                    // new_line('') &
-      // '  fpm find <search-string> [--case|-c]'                                    // new_line('') &
-      // '  fpm find [--name|-n] <search-string> [--case|-c]'                        // new_line('') &
-      // '  fpm find [--url|-u] <search-string> [--case|-c]'                         // new_line('') &
+      // '  fpm find  <search-string> [--name|-n] [--url|-u] [--case|-c]'            // new_line('') &
       // ''                                                                          // new_line('') &
-      // 'where square brackets surround pipe-separated, optional, equivalent'       // new_line('') &
-      // 'alternatives and angular brackets indicate user input values.  Please see' // new_line('') &
-      // 'the README.md file for more detailed explanations of the above arguments.' // new_line('')
+      // 'where angular brackets indicate user input values, square brackets'        // new_line('') &
+      // 'surround optional arguments, and pipes separate equivalent alternatives .' // new_line('') &
+      // 'Please see the README.md file for more detailed explanations.'             // new_line('')
   end if
 
   block
@@ -59,17 +57,24 @@ program fpm_find
       allocate(character(len=search_string_length) :: search_string)
       call get_command_argument(number=1, value=search_string)
 
-      associate(package_index  => package_index_t(file_t(file_path // "/" // file_name)))
-        associate(matching_packages => package_index%find(search_string))
-          if (size(matching_packages) == 0) print '(a)', "No packages found."
-          block
-            integer p
+      associate( &
+         name_search    => command_line%argument_present([string_t("--name"), string_t("-n")]) &
+        ,url_search     => command_line%argument_present([string_t("--url" ), string_t("-u")]) &
+        ,case_sensitive => command_line%argument_present([string_t("--case"), string_t("-c")]) &
+      )
+        associate(package_index => package_index_t(file_t(file_path // "/" // file_name)))
+          associate(matching_packages => package_index%find(search_string, name_search, url_search, case_sensitive))
             print *
-            do p = 1, size(matching_packages)
-              print '(a)', matching_packages(p)%as_text()
-            end do
-          end block
-          stop ! work around malloc error in gfortran 13-16
+            if (size(matching_packages) == 0) print '(a)', "No packages found."
+            block
+              integer p
+              do p = 1, size(matching_packages)
+                print '(a)', matching_packages(p)%as_text()
+              end do
+            end block
+            print *
+            stop ! work around malloc error in gfortran 13-16
+          end associate
         end associate
       end associate
     end associate define_file_path

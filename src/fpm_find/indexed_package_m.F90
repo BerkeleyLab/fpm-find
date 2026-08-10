@@ -75,11 +75,12 @@ module indexed_package_m
       character(len=:), allocatable :: text
     end function
 
-    pure module function contains(self, search_string) result(match)
+    pure module function contains(self, search_string, search_name, search_url, case_sensitive) result(match)
       !! Result is true if any of the package's entries contain search_string as a substring; false otherwise
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
+      logical, intent(in) :: search_name, search_url, case_sensitive
       logical match
     end function
 
