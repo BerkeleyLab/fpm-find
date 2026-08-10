@@ -166,7 +166,7 @@ contains
     else if (len(self%gitlab_) /= 0) then
       package_url = "https://gitlab.com/" // self%gitlab_
     else
-      error stop "Requesed package data contains insufficient information to form a URL: " // new_line('') // self%as_text()
+      package_url = "(insufficient information in package_index.yml)"
     end if
   end procedure
 
