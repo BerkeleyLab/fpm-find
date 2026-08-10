@@ -85,16 +85,6 @@ contains
 
   end procedure
 
-  module procedure as_text
-    integer p
-
-    allocate(character(len=0) :: index_as_text)
-
-    do p = 1, size(self%packages_)
-      index_as_text = index_as_text // new_line('') // self%packages_(p)%as_text()
-    end do
-  end procedure
-
   module procedure find
     integer p
 
@@ -104,20 +94,6 @@ contains
       if (self%packages_(p)%contains(search_string, search_name, search_url, case_sensitive)) &
         package_list = [package_list, self%packages_(p)]
     end do
-
-  end procedure
-
-  module procedure url
-    integer p
-
-    do p = 1, size(self%packages_)
-      if (self%packages_(p)%name_matches(name)) then
-        package_url = self%packages_(p)%url()
-        return
-      end if
-    end do
-
-    allocate(character(len=0) :: package_url)
 
   end procedure
 

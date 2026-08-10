@@ -3,7 +3,6 @@
 
 module indexed_package_m
   !! Define an abstraction for the fortran-lang package-index packages
-  use iso_c_binding, only : c_int
   use julienne_m, only : string_t
   implicit none
 
@@ -17,7 +16,6 @@ module indexed_package_m
     character(len=:), allocatable :: github_, gitlab_, url_ ! optional (zero length if not present)
     character(len=:), allocatable :: license_, version_     ! optional (zero length if not present)
   contains
-    procedure name_matches
     procedure url
     procedure as_text
     procedure contains
@@ -58,14 +56,6 @@ module indexed_package_m
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=:), allocatable :: package_url
-    end function
-
-    pure module function name_matches(self, name) result(match)
-      !! Result is true if the passed name matches the package's name; false otherwise
-      implicit none
-      class(indexed_package_t), intent(in) :: self
-      character(len=*), intent(in) :: name
-      logical match
     end function
 
     pure module function as_text(self) result(text)
