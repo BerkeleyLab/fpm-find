@@ -1,0 +1,253 @@
+name: Build
+
+on:
+  push:
+    paths-ignore: &paths_ignore
+      - 'docs/**'
+      - '**.txt'
+      - '**.md'
+  pull_request:
+    paths-ignore: *paths_ignore
+
+concurrency:
+  # De-duplicate concurrent workflow runs on the same branch/ref
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.compiler }}-${{ matrix.version }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash --noprofile --norc -e -x -o pipefail {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-14, macos-15, macos-15-intel, macos-26, macos-26-intel, ubuntu-24.04, ubuntu-26.04-arm ]
+        compiler: [ gfortran ]
+        version: [ 13, 14, 15, 16 ]
+        extra_flags: [ -g ]
+
+        include:
+
+          # --- LLVM flang coverage ---
+
+          - os: macos-14
+            compiler: flang
+            version: 22
+          - os: macos-15
+            compiler: flang
+            version: 22
+          - os: macos-15-intel
+            compiler: flang
+            version: 22
+          - os: macos-26
+            compiler: flang
+            version: 22
+          - os: macos-26-intel
+            compiler: flang
+            version: 22
+
+          # https://hub.docker.com/r/snowstep/llvm/tags
+          - os: ubuntu-24.04
+            compiler: flang
+            version: latest
+            container: snowstep/llvm:noble
+
+          # https://hub.docker.com/r/phhargrove/llvm-flang/tags
+          - os: ubuntu-24.04
+            compiler: flang
+            version: 23
+            container: phhargrove/llvm-flang:23.1.0_rc2-latest
+          - os: ubuntu-24.04
+            compiler: flang
+            version: 22
+            container: phhargrove/llvm-flang:22.1.0-latest
+          - os: ubuntu-24.04
+            compiler: flang
+            version: 21
+            container: phhargrove/llvm-flang:21.1.0-latest
+          - os: ubuntu-24.04
+            compiler: flang
+            version: 20
+            container: phhargrove/llvm-flang:20.1.0-latest
+          - os: ubuntu-24.04
+            compiler: flang
+            version: 19
+            extra_flags: -g -mmlir -allow-assumed-rank
+            container: phhargrove/llvm-flang:19.1.1-latest
+
+          # --- Intel coverage ---
+
+          # https://hub.docker.com/r/intel/oneapi-toolkit/tags
+          - os: ubuntu-24.04
+            compiler: ifx
+            version: latest
+            container: intel/oneapi-toolkit:latest
+
+          - os: ubuntu-24.04
+            compiler: ifx
+            version: 2026.0.0
+            container: intel/oneapi-toolkit:2026.0.0-devel-ubuntu24.04
+
+          # --- LFortran coverage ---
+
+          # https://github.com/lfortran/lfortran/pkgs/container/lfortran
+          - os: ubuntu-22.04
+            compiler: lfortran
+            version: 0.64.0
+            container: ghcr.io/lfortran/lfortran:v0.64.0
+
+          - os: ubuntu-22.04
+            compiler: lfortran
+            version: latest
+            container: ghcr.io/lfortran/lfortran:latest
+
+    container:
+      image: ${{ matrix.container }}
+
+    env:
+      COMPILER_VERSION: ${{ matrix.version }}
+      FC: ${{ matrix.compiler }}
+      FFLAGS: ${{ matrix.extra_flags }}
+      FPM_FLAGS:  --profile release --verbose --flag -DASSERTIONS
+      CHECK_ASSERT: --flag -DASSERTIONS 2>&1 | tee output ; test ${PIPESTATUS[0]} = $ERROR_STOP_CODE && grep -q "Assertion failure" output
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Install Ubuntu Native Dependencies
+      if: ${{ contains(matrix.os, 'ubuntu') && matrix.container == '' && matrix.compiler == 'gfortran' }}
+      run: |
+        sudo apt-get update
+        #sudo apt list -a 'gfortran-*'
+        sudo apt install -y build-essential
+        if [[ ${COMPILER_VERSION} -lt 15 ]] || type -p gfortran-${COMPILER_VERSION} ; then
+          sudo apt install -y gfortran-${COMPILER_VERSION}
+        else
+          curl -L https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh -o install-homebrew.sh
+          chmod +x install-homebrew.sh
+          env CI=1 ./install-homebrew.sh
+          HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew"
+          ${HOMEBREW_PREFIX}/bin/brew install -v gcc@${COMPILER_VERSION} binutils
+          ls -al ${HOMEBREW_PREFIX}/bin
+          echo "PATH=${HOMEBREW_PREFIX}/bin:${PATH}" >> "$GITHUB_ENV"
+          : Homebrew GCC@15 needs binutils 2.44+
+          HOMEBREW_BINUTILS=$(ls -d ${HOMEBREW_PREFIX}/Cellar/binutils/2.*/bin )
+          ls -al ${HOMEBREW_BINUTILS}
+          echo "FFLAGS=$FFLAGS -B ${HOMEBREW_BINUTILS}" >> "$GITHUB_ENV"
+          echo "CFLAGS=$CFLAGS -B ${HOMEBREW_BINUTILS}" >> "$GITHUB_ENV"
+          echo "CXXFLAGS=$CXXFLAGS -B ${HOMEBREW_BINUTILS}" >> "$GITHUB_ENV"
+        fi
+
+    - name: Install Ubuntu Container Dependencies
+      if: ${{ contains(matrix.os, 'ubuntu') && matrix.container != '' && !contains(matrix.container, 'phhargrove') }}
+      run: |
+        apt update
+        apt install -y build-essential git curl
+        # Add container lfortran to PATH:
+        if test "$FC" = "lfortran"; then
+          echo "/app/bin" >> "$GITHUB_PATH"
+          ls -alh /app/bin
+          ls -alh /app/share/lfortran/lib/
+        fi
+
+    - name: Install macOS Dependencies
+      if: contains(matrix.os, 'macos')
+      run: |
+        # silence Homebrew tap trust warnings:
+        (set +e ; brew untap -f aws/tap hashicorp/tap 2>&1 | perl -pe 's/#*.warning./warn: /' ; brew trust azure/bicep )
+        brew update
+        # fpm binary distribution for macOS requires gfortran shared libraries from gcc@12
+        brew install gcc@12
+        if [[ ${{ matrix.compiler }} == 'gfortran' && ${COMPILER_VERSION} -gt 15 ]] ; then
+          brew install gcc@${COMPILER_VERSION}
+        fi
+
+    - name: Install LLVM flang on macOS
+      if: contains(matrix.os, 'macos') && matrix.compiler == 'flang'
+      run: |
+        brew install llvm@${COMPILER_VERSION} flang
+        # workaround issue #228: clang cannot find homebrew flang's C header
+        for p in /opt/homebrew /usr/local $(brew --prefix) ; do find $p/Cellar/flang -name ISO_Fortran_binding.h 2>/dev/null || true ; done
+        echo "CFLAGS=-I$(dirname $(find $(brew --prefix)/Cellar/flang -name ISO_Fortran_binding.h | head -1)) ${CFLAGS}" >> "$GITHUB_ENV"
+        # Prepend homebrew clang to PATH:
+        echo "PATH=$(brew --prefix)/opt/llvm/bin:${PATH}" >> "$GITHUB_ENV"
+
+    - name: Setup Compilers
+      run: |
+        if test "$FC" = "flang" ; then
+          echo "FPM_FC=flang-new" >> "$GITHUB_ENV"
+        elif test "$FC" = "ifx" ; then
+          echo "FPM_FC=ifx" >> "$GITHUB_ENV"
+          # ifx coarray support is disabled because it hides runtime failures
+          echo "FFLAGS=-DHAVE_MULTI_IMAGE_SUPPORT=0 -fpp -g -traceback $FFLAGS" >> "$GITHUB_ENV"
+        elif test "$FC" = "lfortran" ; then
+          echo "FPM_FC=lfortran" >> "$GITHUB_ENV"
+          echo "FFLAGS=--cpp --realloc-lhs-arrays --separate-compilation $FFLAGS" >> "$GITHUB_ENV"
+          echo "FPM_FLAGS=--profile debug --verbose" >> "$GITHUB_ENV" ; : fpm 0.13 workaround
+        else
+          echo "FPM_FC=gfortran-${COMPILER_VERSION}" >> "$GITHUB_ENV"
+          echo "FFLAGS=-ffree-line-length-0 $FFLAGS" >> "$GITHUB_ENV"
+        fi
+        if [[ "${{ matrix.container }}" =~ "snowstep/llvm" ]] ; then
+          echo "LD_LIBRARY_PATH=/usr/lib/llvm-22/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+        fi
+
+    - name: Setup FPM
+      if: ${{ !(runner.os == 'Linux' && runner.arch == 'ARM64') }}
+      uses: fortran-lang/setup-fpm@main
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        fpm-version: latest
+
+    - name: Build FPM
+      if: ${{ runner.os == 'Linux' && runner.arch == 'ARM64' }}
+      run: |
+        export FPM_VERSION=0.13.0
+        curl --retry 5 -LOsS https://github.com/fortran-lang/fpm/releases/download/v$FPM_VERSION/fpm-$FPM_VERSION.F90
+        mkdir fpm-temp
+        gfortran-14 -o fpm-temp/fpm fpm-$FPM_VERSION.F90
+        echo "PATH=${PWD}/fpm-temp:${PATH}" >> "$GITHUB_ENV"
+
+    - name: Version info
+      run: |
+        set +x
+        echo == TOOL VERSIONS ==
+        echo Platform version info:
+        uname -a
+        if test -r /etc/os-release ; then grep -e NAME -e VERSION /etc/os-release  ; fi
+        if test -x /usr/bin/sw_vers ; then /usr/bin/sw_vers ; fi
+        echo
+        echo PATH="$PATH"
+        for tool in ${FPM_FC} fpm ; do
+          ( echo ; set -x ; w=$(which $tool) ; ls -al $w ; ls -alhL $w ; $tool --version )
+        done
+
+    - name: Build and Test in-place
+      run: |
+        fpm test ${FPM_FLAGS} --flag "$FFLAGS"
+        fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- strings 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i iso_varying_string output
+        fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- julienne --name 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /berkeleylab/julienne output
+        fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- nasa --url --name 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /nasa/ output
+        fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- BerkeleyLab -u -c 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /BerkeleyLab/ output
+
+    - name: Install and Test plugin
+      run: |
+        fpm install ${FPM_FLAGS} --flag "$FFLAGS"
+        export PATH="$HOME/.local/bin/:$PATH"
+        fpm find strings 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i iso_varying_string output
+        fpm find julienne --name 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /berkeleylab/julienne output
+        fpm find nasa --url --name 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /nasa/ output
+        fpm find BerkeleyLab -u -c 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /BerkeleyLab/ output
+
