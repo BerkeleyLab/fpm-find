@@ -73,7 +73,6 @@ program fpm_find
               end do
             end block
             print *
-            stop ! work around malloc error in gfortran 13-16
           end associate
         end associate
       end associate
