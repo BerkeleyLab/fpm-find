@@ -16,34 +16,41 @@ subroutine test_fpm_find(tests, passes)
   ! ______ Test data ______
   define_package_index_items: &
   associate( &
-    formal => [ &
+    formal_entry => [ &
        string_t("- name: formal") &
-      ,string_t("  github: BerkeleyLab/formal") &
+      ,string_t("  github: berkeleylab/formal") &
       ,string_t("  description: Formulaic mimetic abstraction language") &
       ,string_t("  categories: numerical") &
       ,string_t("  tags: partial-differential-equations domain-specific-language mimetic-discretizations") &
       ,string_t("  license: BSD") &
       ,string_t("  version: 0.3.0") &
     ] &
-    ,julienne => [ &
+    ,julienne_entry => [ &
        string_t("- name: julienne") &
-      ,string_t("  github: berkeleylab/Julienne") &
+      ,string_t("  github: berkeleylab/julienne") &
       ,string_t("  description: A correctness-checking framework supporting expressive idioms for writing assertions and tests") &
       ,string_t("  categories: testing") &
       ,string_t("  tags: unit-testing assertions pure-procedure-diagnostic-output") &
       ,string_t("  version: 3.4.1") &
     ] &
-    ,assert => [ &
+    ,assert_entry => [ &
          string_t("- name: assert") &
-        ,string_t("  url: https://github.com/BerkeleyLab/assert") &
+        ,string_t("  url: https://github.com/berkeleylab/assert") &
         ,string_t("  description: A library for the run-time checking of program invariants and for providing diagnostic error output inside pure procedures") &
         ,string_t("  categories: testing") &
         ,string_t("  tags: programming-utilities learning high-performance-computing") &
         ,string_t("  license: BSD") &
     ] &
-    ,caffeine => [ &
+    ,fiats_entry => [ &
+         string_t("- name : fiats") &
+        ,string_t("description : A deep learning library for use in high-performance computing applications in modern Fortran") &
+        ,string_t("categories : numerical") &
+        ,string_t("tags : machine-learning deep-learning high-performance-computing") &
+        ,string_t("url : https://github.com/BerkeleyLab/fiats") &
+    ] &
+    ,caffeine_entry => [ &
        string_t("- name: caffeine") &
-      ,string_t("  github: BerkeleyLab/Caffeine") &
+      ,string_t("  github: berkeleylab/caffeine") &
       ,string_t("  description: CoArray Fortran Framework of Efficient Interfaces to Network Environments") &
       ,string_t("  categories: compiler") &
       ,string_t("  tags: parallel-runtime-library prif llvm-flang lfortran gasnet") &
@@ -54,57 +61,60 @@ subroutine test_fpm_find(tests, passes)
       berkeley_packages => file_t([ &
          string_t("# File Header") &
         ,string_t("#") &
-        ,formal &
+        ,formal_entry &
         ,string_t("") &
         ,string_t("# Section Header") &
-        ,julienne &
+        ,julienne_entry &
         ,string_t("") &
-        ,assert &
+        ,assert_entry &
+        ,fiats_entry &
         ,string_t("") &
-        ,caffeine &
+        ,caffeine_entry &
       ]))
 
       ! ______ Test subject ______
-      print '(a)', new_line('') // "fpm-find"
+      print '(a)', new_line('') // "The fpm 'find' subcommand"
 
       ! ______ Tests ______
       define_index_and_package_entries: &
       associate( &
-                 packages => package_index_t(berkeley_packages) &
-        ,  assert_package => indexed_package_t(assert) &
-        ,caffeine_package => indexed_package_t(caffeine) &
-        ,  formal_package => indexed_package_t(formal) &
-        ,julienne_package => indexed_package_t(julienne) &
+        packages => package_index_t(berkeley_packages) &
+        ,caffeine_pkg => indexed_package_t(caffeine_entry) &
+        ,  formal_pkg => indexed_package_t(  formal_entry) &
+        ,   fiats_pkg => indexed_package_t(   fiats_entry) &
+        ,julienne_pkg => indexed_package_t(julienne_entry) &
+        ,  assert_pkg => indexed_package_t(  assert_entry) &
       )
-        capture_package_entry_text: &
+        find_package_entries: &
         associate( &
-             assert_txt =>   assert_package%as_text() &
-          ,caffeine_txt => caffeine_package%as_text() &
-          ,  formal_txt =>   formal_package%as_text() &
-          ,julienne_txt => julienne_package%as_text() &
+           formal          => packages%find("formal"     , search_name=.false., search_url=.false., case_sensitive=.false.) &
+          ,fiats           => packages%find("BerkeleyLab", search_name=.false., search_url=.true. , case_sensitive=.true. ) &
+          ,caffeine        => packages%find("caffeine"   , search_name=.true. , search_url=.false., case_sensitive=.false.) &
+          ,nothing         => packages%find("nonexistent", search_name=.true. , search_url=.false., case_sensitive=.false.) &
+          ,julienne_assert => packages%find("assert"     , search_name=.false., search_url=.false., case_sensitive=.false.) &
         )
           block
-            integer :: find_tests = 0, find_passes = 0
+            integer :: tests_subtotal = 0, passes_subtotal = 0
 
-            call test(packages%find("caffeine")  == caffeine_txt, " finding a package with no optional data"         &
-              ,find_tests, find_passes)
-            call test(packages%find("formal")    ==   formal_txt, " finding a package with optional license/version" &
-              ,find_tests, find_passes)
-            call test(packages%find("julienne")  == julienne_txt, " finding a package listed after a section header" &
-              ,find_tests, find_passes)
-            call test(packages%find("numerical") ==   formal_txt, " finding a package based on category text"        &
-              ,find_tests, find_passes)
-            call test(packages%find("fake")      ==            "", " returning blank text for a missing package"     &
-              ,find_tests, find_passes)
-            call test(packages%find("assert")    == julienne_txt // assert_txt, " finding two matching packages"     &
-              ,find_tests, find_passes)
+            call test(size(  formal)==1 .and.   formal(1)%as_text() ==   formal_pkg%as_text(), &
+              " searching without optional arguments"     , tests_subtotal, passes_subtotal)
+            call test(size(   fiats)==1 .and.    fiats(1)%as_text() ==    fiats_pkg%as_text(), &
+              " searching on case-sensitive URL text via the options `--url --case`"          , tests_subtotal, passes_subtotal)
+            call test(size(caffeine)==1 .and. caffeine(1)%as_text() == caffeine_pkg%as_text(), &
+              " searching on package-name text via the option `--name`"                , tests_subtotal, passes_subtotal)
+            call test(size( nothing)==0                                                      , &
+              " finding nothing for an unlisted package", tests_subtotal, passes_subtotal)
+            call test(size(julienne_assert) == 2 &
+              .and.  julienne_assert(1)%as_text() ==  julienne_pkg%as_text() &
+              .and.  julienne_assert(2)%as_text() ==    assert_pkg%as_text(), &
+               " finding two matching packages", tests_subtotal, passes_subtotal)
 
-            print fmt(tests), "______ ", find_passes, " of ", find_tests, " tests passed. ______"
+            print fmt(tests), "______ ", passes_subtotal, " of ", tests_subtotal, " tests passed. ______"
 
-            tests  = tests  + find_tests
-            passes = passes + find_passes
+            tests  = tests  + tests_subtotal
+            passes = passes + passes_subtotal
           end block
-        end associate capture_package_entry_text
+        end associate find_package_entries
       end associate define_index_and_package_entries
     end associate define_package_index_file_object
   end associate define_package_index_items
