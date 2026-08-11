@@ -22,13 +22,13 @@ path, run `fpm install --help` or `fpm --help` (or replace `--help `with `-h`).
 
 ### Supported Platforms
 
-Vendor  |Compiler  |Versions|Recommended `--flag` value                         |Use `--profile release`
---------|----------|--------|---------------------------------------------------|-----------------------
-GCC     |`gfortran`|13-17   |`-ffree-line-length-none` for version 13           |yes
-LLVM    |`flang`   |19-23   |`-mmlir -allow-assumed-rank` for version 19        |yes
-NAG     |`nagfor`  |7.2     |`-fpp -O4`                                         |no
-Intel   |`ifx`     |2026.1.0|`-fpp`                                             |yes
-LFortran|`lfortran`|0.64.0  |`--cpp --realloc-lhs-arrays --separate-compilation`|yes
+Compiler  |Vendor  |Versions|Recommended `--flag` value                         |Use `--profile release`
+----------|--------|--------|---------------------------------------------------|-----------------------
+`flang`   |LLVM    |19-23   |`-mmlir -allow-assumed-rank` for version 19        |yes
+`gfortran`|GCC     |13-17   |`-ffree-line-length-none` for version 13           |yes
+`ifx`     |Intel   |2026.1.0|`-fpp`                                             |yes
+`lfortran`|LFortran|0.64.0  |`--cpp --realloc-lhs-arrays --separate-compilation`|no
+`nagfor`  |NAG     |7.2     |`-fpp -O4`                                         |no
 
 Usage
 -----
