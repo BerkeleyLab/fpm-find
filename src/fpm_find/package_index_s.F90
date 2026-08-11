@@ -1,7 +1,7 @@
 ! Copyright (c) 2026, The Regents of the University of California
 ! Terms of use are as specified in LICENSE.txt
 
-#include "fpm-search-language-support.F90"
+#include "fpm-find-language-support.F90"
 
 submodule(package_index_m) package_index_s
   use julienne_m, only : string_t

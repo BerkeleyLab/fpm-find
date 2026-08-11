@@ -1,8 +1,8 @@
 ! Copyright (c) 2026, The Regents of the University of California
 ! Terms of use are as specified in LICENSE.txt
 
-#ifndef FPM_SEARCH_COMPILER_SUPPORT
-#define FPM_SEARCH_COMPILER_SUPPORT
+#ifndef FPM_FIND_LANGUAGE_SUPPORT
+#define FPM_FIND_LANGUAGE_SUPPORT
 
 #ifdef __GNUC__
 #  define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
