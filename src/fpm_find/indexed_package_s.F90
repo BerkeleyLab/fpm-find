@@ -1,7 +1,7 @@
 ! Copyright (c) 2026, The Regents of the University of California
 ! Terms of use are as specified in LICENSE.txt
 
-#include "fpm-search-language-support.F90"
+#include "fpm-find-language-support.F90"
 #include "julienne-assert-macros.h"
 
 submodule(indexed_package_m) indexed_package_s

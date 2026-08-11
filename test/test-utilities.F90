@@ -2,6 +2,7 @@
 ! Terms of use are as specified in LICENSE.txt
 
 module test_utilities_m
+  !! Define procedures for us in fpm-find unit tests
   implicit none
 
   private
@@ -11,6 +12,7 @@ module test_utilities_m
 contains
 
   subroutine test(test_condition, test_description, num_tests, num_passes)
+    !! Check the result of one test and tally the tests and passes
     logical, intent(in) :: test_condition
     integer, intent(inout) :: num_tests, num_passes
     character(len=*), intent(in) :: test_description
@@ -20,6 +22,7 @@ contains
   end subroutine
 
   pure function fmt(num_tests)
+    !! Define a format string for printing the tallies of tests and passes
     integer, intent(in) :: num_tests
     character(len=:), allocatable :: fmt
     select case(num_tests)
