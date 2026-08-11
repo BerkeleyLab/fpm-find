@@ -76,7 +76,7 @@ subroutine test_fpm_find(tests, passes)
       ]))
 
       ! ______ Test subject ______
-      print '(a)', new_line('') // "The fpm 'find' subcommand"
+      print '(a)', new_line('') // "The fpm 'find' plugin"
 
       ! ______ Tests ______
       define_index_and_package_entries: &
