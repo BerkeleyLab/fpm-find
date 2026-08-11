@@ -10,16 +10,16 @@ program fpm_find
   type(command_line_t) command_line
 
   if (command_argument_count() < 1 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
-    stop                                                                                new_line('') &
-      // ''                                                                          // new_line('') &
-      // 'Usage:'                                                                    // new_line('') &
-      // ''                                                                          // new_line('') &
-      // '  fpm find [--help|-h]'                                                    // new_line('') &
-      // '  fpm find  <search-string> [--name|-n] [--url|-u] [--case|-c]'            // new_line('') &
-      // ''                                                                          // new_line('') &
-      // 'where angular brackets indicate user input values, square brackets'        // new_line('') &
-      // 'surround optional arguments, and pipes separate equivalent alternatives .' // new_line('') &
-      // 'Please see the README.md file for more detailed explanations.'             // new_line('')
+    stop                                                                               new_line('') &
+      // ''                                                                         // new_line('') &
+      // 'Usage:'                                                                   // new_line('') &
+      // ''                                                                         // new_line('') &
+      // '  fpm find [--help|-h]'                                                   // new_line('') &
+      // '  fpm find  <search-string> [--name|-n] [--url|-u] [--case|-c]'           // new_line('') &
+      // ''                                                                         // new_line('') &
+      // 'where angular brackets indicate user input values, square brackets'       // new_line('') &
+      // 'surround optional arguments, and pipes separate equivalent alternatives.' // new_line('') &
+      // 'Please see the README.md file for detailed explanations and examples.'    // new_line('')
   end if
 
   block
@@ -73,7 +73,6 @@ program fpm_find
               end do
             end block
             print *
-            stop ! work around malloc error in gfortran 13-16
           end associate
         end associate
       end associate
