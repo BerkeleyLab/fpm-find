@@ -65,12 +65,12 @@ fpm find --find julienne
 ```
 opens `build/package_index.yml`, if present, and returns
 ```
-- name : julienne 
-description : A correctness-checking framework supporting natural-language idioms for unit testing and assertions; also facilitating formatted diagnostic output during error termination in pure procedures 
-categories : programming 
-tags : unit-testing assertions pure-procedure-diagnostic-output 
-github : berkeleylab/julienne 
-license : BSD-3-Clause 
+- name : julienne
+description : A correctness-checking framework supporting natural-language idioms for unit testing and assertions; also facilitating formatted diagnostic output during error termination in pure procedures
+categories : programming
+tags : unit-testing assertions pure-procedure-diagnostic-output
+github : berkeleylab/julienne
+license : BSD-3-Clause
 ```
 Before attempting to read the package index file, `fpm-find` attempts to
 download an updated copy of the file from fortran-lang's webpage repository.
