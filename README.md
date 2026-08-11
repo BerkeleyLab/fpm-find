@@ -57,7 +57,7 @@ If `fpm` is not in your `PATH` but `fpm-find` is, replace `fpm find` with
 ```
 fpm find numerical         # search all package data for "numerical"
 fpm find julienne --name   # search package names for "julienne"
-fpm find nasa --url --name # search package names and URLS for "nasa"
+fpm find nasa --url --name # search package names and URLs for "nasa"
 fpm find BerkeleyLab -u -c # case-sensitive search for "BerkeleyLab" in package URLs 
 ```
 Before accessing the index installed in `$HOME/.local/share/package_index.yml`,
