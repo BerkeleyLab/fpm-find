@@ -193,7 +193,7 @@ contains
   end procedure
 
   module procedure contains
-    
+
     character(len=:), allocatable :: search_subject
 
     allocate(character(len=0) :: search_subject)
@@ -210,7 +210,7 @@ contains
     else
       match = index(lower_case(search_subject), lower_case(search_string)) /= 0
     end if
-       
+
   end procedure
 
   pure function lower_case(string) result(lower_case_string)

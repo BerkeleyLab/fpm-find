@@ -10,7 +10,7 @@ program main
 
   call test_fpm_find(tests, passes)
 
-  print fmt(tests), new_line(''), passes, " of ", tests, " tests passed in total. "// "____" // new_line('') 
+  print fmt(tests), new_line(''), passes, " of ", tests, " tests passed in total. "// "____" // new_line('')
 
   if (passes /= tests) error stop   "______ Some tests failed. ______"
 
