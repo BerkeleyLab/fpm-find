@@ -2,7 +2,10 @@
 ! Terms of use are as specified in LICENSE.txt
 
 module test_fpm_find_m
-  !! Test the package-find library functions
+  !! Define unit tests for fpm-find library functions:
+  !! - the `indexed_package_t` constructor,
+  !! - the `package_index_t` constructor, and
+  !! - the `find` type-bound function.
   use julienne_m, only : file_t, string_t
   use fpm_find_m, only : indexed_package_t, package_index_t
   use test_utilities_m, only : test, fmt
