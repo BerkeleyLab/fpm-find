@@ -5,7 +5,7 @@ A Fortran package search tool
 
 Introduction
 ------------
-The fpm-find tool searches the [fortran-lang] [package index].  Designed as a
+The fpm-find tool searches [fortran-lang]'s [package index].  Designed as a
 [Fortran Package Manager] (`fpm`) plugin, fpm-find also runs as a stand-alone
 program.
 
