@@ -1,8 +1,13 @@
-***************************
+*************************************
+*** fpm-find Terms and Conditions ***
+*************************************
+
+All files in this directory and all sub-directories (except where otherwise noted)
+are subject to the following copyright and licensing terms:
 
 *** Copyright Notice ***
 
-fpm-search Copyright (c) 2026, The Regents of the University of California,
+fpm-find Copyright (c) 2026, The Regents of the University of California,
 through Lawrence Berkeley National Laboratory (subject to receipt of
 any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 
@@ -18,13 +23,11 @@ Software to reproduce, distribute copies to the public, prepare derivative
 works, and perform publicly and display publicly, and to permit others to do so.
 
 
-****************************
-
 *** License Agreement ***
 
 MIT License
 
-fpm-search Copyright (c) 2026, The Regents of the University of California,
+fpm-find Copyright (c) 2026, The Regents of the University of California,
 through Lawrence Berkeley National Laboratory (subject to receipt of
 any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 
