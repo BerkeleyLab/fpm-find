@@ -5,6 +5,7 @@
 #include "julienne-assert-macros.h"
 
 submodule(indexed_package_m) indexed_package_s
+  use julienne_m, only : call_julienne_assert_
   implicit none
 
 contains
