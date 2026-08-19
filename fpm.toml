@@ -2,4 +2,4 @@ name = "fpm-find"
 version = "0.1.0"
 
 [dependencies]
-julienne = {git = "https://github.com/berkeleylab/julienne.git", tag = "support-lfortran-0.64"}
+julienne = {git = "https://github.com/berkeleylab/julienne.git", tag = "4.1.1"}
