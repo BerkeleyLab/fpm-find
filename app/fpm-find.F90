@@ -10,21 +10,22 @@ program fpm_find
   type(command_line_t) command_line
 
   if (command_argument_count() < 1 .or. command_line%argument_present([character(len=len("--help")) :: ("--help"), "-h"])) then
-    stop                                                                               new_line('') &
-      // ''                                                                         // new_line('') &
-      // 'Usage:'                                                                   // new_line('') &
-      // ''                                                                         // new_line('') &
-      // '  fpm find [--help|-h]'                                                   // new_line('') &
-      // '  fpm find  <search-string> [--name|-n] [--url|-u] [--case|-c]'           // new_line('') &
-      // ''                                                                         // new_line('') &
-      // 'where angular brackets indicate user input values, square brackets'       // new_line('') &
-      // 'surround optional arguments, and pipes separate equivalent alternatives.' // new_line('') &
-      // 'Please see the README.md file for detailed explanations and examples.'    // new_line('')
+    stop                                                                                          new_line('') &
+      // ''                                                                                    // new_line('') &
+      // 'Usage:'                                                                              // new_line('') &
+      // ''                                                                                    // new_line('') &
+      // '  fpm find [--help|-h]'                                                              // new_line('') &
+      // '  fpm find  <search-string> [--name|-n] [--url|-u] [--case|-c] [--build-systems|-b]' // new_line('') &
+      // ''                                                                                    // new_line('') &
+      // 'where angular brackets indicate user input values, square brackets'                  // new_line('') &
+      // 'surround optional arguments, and pipes separate equivalent alternatives.'            // new_line('') &
+      // 'Please see the README.md file for detailed explanations and examples.'               // new_line('')
   end if
 
   block
     character(len=*), parameter :: url_base = "https://raw.githubusercontent.com/fortran-lang/webpage/refs/heads/main/data"
     character(len=*), parameter :: infix = ".local/share/fpm-find", file_name = "package_index.yml"
+    character(len=*), parameter  :: downloaded_file_name = file_name // "-download"
     character(len=:), allocatable :: search_string, default_prefix
     integer exit_status, search_string_length, prefix_length
 
@@ -41,17 +42,27 @@ program fpm_find
         ,exitstat = exit_status &
       )
       call execute_command_line( &
-         command = "curl --silent -L " // url_base // "/" // file_name // " > "  // file_path // "/" // file_name &
+         command = "curl --silent -L " // url_base // "/" // file_name // " > "  // file_path // "/" // downloaded_file_name &
         ,wait = .true. &
         ,exitstat = exit_status &
       )
       if (exit_status /= 0) then
         call execute_command_line( &
-           command  = "wget --quiet " //  url_base // "/" // file_name // " -O " // file_path // "/" // file_name &
+           command  = "wget --quiet " //  url_base // "/" // file_name // " -O " // file_path // "/" // downloaded_file_name &
           ,wait     = .true. &
           ,exitstat = exit_status &
         )
       end if
+
+      associate(downloaded_file => file_t(file_path // "/" // downloaded_file_name))
+        if (size(downloaded_file%lines()) /= 0) then
+          call execute_command_line( &
+             command  = "mv " // file_path // "/" // downloaded_file_name // " " // file_path // "/" // file_name &
+            ,wait     = .true. &
+            ,exitstat = exit_status &
+          )
+        end if
+      end associate
 
       call get_command_argument(number=1, length=search_string_length)
       allocate(character(len=search_string_length) :: search_string)
