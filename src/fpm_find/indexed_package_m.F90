@@ -3,7 +3,7 @@
 
 module indexed_package_m
   !! Define an abstraction for the fortran-lang package-index packages
-  use julienne_m, only : string_t
+  use julienne_m, only : string_t, operator(.separatedBy.)
   implicit none
 
   private
@@ -20,6 +20,7 @@ module indexed_package_m
     procedure url
     procedure as_text
     procedure contains
+    procedure build_systems
   end type
 
   interface indexed_package_t
@@ -67,15 +68,22 @@ module indexed_package_m
       character(len=:), allocatable :: text
     end function
 
-    pure module function contains(self, search_string, search_name, search_url, case_sensitive) result(match)
+    pure module function contains(self, search_string, search_name, search_url, search_build_systems, case_sensitive) result(match)
       !! Result is true if any of the package's entries contain search_string as a substring; false otherwise.
       !! search_name and search_url restrict the search to the package name or URL of the union of the two.
       !! case_sensitive toggles case sensitivity
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
-      logical, intent(in) :: search_name, search_url, case_sensitive
+      logical, intent(in) :: search_name, search_url, search_build_systems, case_sensitive
       logical match
+    end function
+
+    pure module function build_systems(self) result(build_systems_list)
+      !! Result is a space-separated list of self's build systems
+      implicit none
+      class(indexed_package_t), intent(in) :: self
+      character(len=:), allocatable :: build_systems_list
     end function
 
   end interface

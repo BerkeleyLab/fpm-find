@@ -10,6 +10,12 @@ submodule(indexed_package_m) indexed_package_s
 
 contains
 
+  module procedure build_systems
+    associate(build_systems_string => self%build_systems_ .separatedBy. " ")
+      build_systems_list = build_systems_string%string()
+    end associate
+  end procedure
+
   module procedure construct_from_components
     indexed_package%name_        = name
     indexed_package%description_ = description
@@ -227,7 +233,8 @@ contains
          "- name : "      // self%name_        // new_line('') &
       // "description : " // self%description_ // new_line('') &
       // "categories : "  // self%categories_  // new_line('') &
-      // "tags : "        // self%tags_
+      // "tags : "        // self%tags_        // new_line('') &
+      // "build-systems : " // self%build_systems()
 
     if (len(self%github_ )/=0) then
       text = text // new_line('') // "url : " // self%url()
@@ -248,14 +255,17 @@ contains
 
     character(len=:), allocatable :: search_subject
 
-    allocate(character(len=0) :: search_subject)
-
-    if (search_name .or. (.not. search_url )) search_subject = search_subject // self%name_
-    if (search_url  .or. (.not. search_name)) search_subject = search_subject // self%url()
-
-    if (.not. any([search_name, search_url])) &
-      search_subject = search_subject &
-        // self%description_ // self%categories_ // self%tags_ // self%github_ // self%gitlab_ // self%license_ // self%version_
+    associate(search_all => .not. any([search_name, search_url, search_build_systems]))
+      if (search_all) then
+        search_subject = self%description_ // self%categories_ // self%tags_ // self%github_ // self%gitlab_ // self%license_ &
+          // self%version_ // self%build_systems()
+      else
+        allocate(character(len=0) :: search_subject)
+        if (search_name         ) search_subject = search_subject // self%name_
+        if (search_url          ) search_subject = search_subject // self%url()
+        if (search_build_systems) search_subject = search_subject // self%build_systems()
+      end if
+    end associate
 
     if (case_sensitive) then
       match = index(search_subject, search_string) /= 0

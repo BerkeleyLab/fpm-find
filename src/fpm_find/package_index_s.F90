@@ -91,7 +91,7 @@ contains
     allocate(package_list(0))
 
     do p = 1, size(self%packages_)
-      if (self%packages_(p)%contains(search_string, search_name, search_url, case_sensitive)) &
+      if (self%packages_(p)%contains(search_string, search_name, search_url, search_build_systems, case_sensitive)) &
         package_list = [package_list, self%packages_(p)]
     end do
 

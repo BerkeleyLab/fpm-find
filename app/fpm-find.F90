@@ -69,12 +69,13 @@ program fpm_find
       call get_command_argument(number=1, value=search_string)
 
       associate( &
-         name_search    => command_line%argument_present([string_t("--name"), string_t("-n")]) &
-        ,url_search     => command_line%argument_present([string_t("--url" ), string_t("-u")]) &
-        ,case_sensitive => command_line%argument_present([string_t("--case"), string_t("-c")]) &
+         name_search    => command_line%argument_present([string_t("--name"         ), string_t("-n")]) &
+        ,url_search     => command_line%argument_present([string_t("--url"          ), string_t("-u")]) &
+        ,case_sensitive => command_line%argument_present([string_t("--case"         ), string_t("-c")]) &
+        ,build_systems  => command_line%argument_present([string_t("--build-systems"), string_t("-b")]) &
       )
         associate(package_index => package_index_t(file_t(file_path // "/" // file_name)))
-          associate(matching_packages => package_index%find(search_string, name_search, url_search, case_sensitive))
+          associate(matching_packages => package_index%find(search_string, name_search, url_search, build_systems, case_sensitive))
             print *
             if (size(matching_packages) == 0) print '(a)', "No packages found."
             block
