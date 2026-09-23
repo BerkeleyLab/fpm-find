@@ -11,9 +11,13 @@ submodule(indexed_package_m) indexed_package_s
 contains
 
   module procedure build_systems
-    associate(build_systems_string => self%build_systems_ .separatedBy. " ")
-      build_systems_list = build_systems_string%string()
-    end associate
+    if (size(self%build_systems_)==0) then
+      build_systems_list = ""
+    else
+      associate(build_systems_string => self%build_systems_ .separatedBy. " ")
+        build_systems_list = build_systems_string%string()
+      end associate
+    end if
   end procedure
 
   module procedure construct_from_components
@@ -256,6 +260,7 @@ contains
     character(len=:), allocatable :: search_subject
 
     associate(search_all => .not. any([search_name, search_url, search_build_systems]))
+
       if (search_all) then
         search_subject = self%description_ // self%categories_ // self%tags_ // self%github_ // self%gitlab_ // self%license_ &
           // self%version_ // self%build_systems()
