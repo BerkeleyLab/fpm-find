@@ -130,7 +130,13 @@ contains
       type(string_t), allocatable :: string_array(:)
       integer c, s
 
+#ifdef __GFORTRAN__
+      block
+      character(len=:), allocatable :: trimmed
+      trimmed = trim(adjustl(text))
+#else
       associate(trimmed => trim(adjustl(text)))
+#endif
         associate( &
            leading_edges  => [1, [(merge(c, 0, trimmed(c:c)/=" " .and. trimmed(c-1:c-1)==" "), c = 2, len(trimmed)  )]               ] &
           ,trailing_edges => [   [(merge(c, 0, trimmed(c:c)/=" " .and. trimmed(c+1:c+1)==" "), c = 1, len(trimmed)-1)], len(trimmed) ] &
@@ -142,7 +148,11 @@ contains
             string_array = [( string_t(trimmed(leads(s):trails(s))), s = 1, size(trails) )]
           end associate
         end associate
+#ifndef __GFORTRAN__
       end associate
+#else
+      end block
+#endif
     end function
 
     pure function get_key_value_array(key, lines) result(key_value_array)
