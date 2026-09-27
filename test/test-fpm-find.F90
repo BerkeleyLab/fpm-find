@@ -35,6 +35,7 @@ subroutine test_fpm_find(tests, passes)
       ,string_t("  categories: testing") &
       ,string_t("  tags: unit-testing assertions pure-procedure-diagnostic-output") &
       ,string_t("  version: 3.4.1") &
+      ,string_t("build-systems: fpm") &
     ] &
     ,assert_entry => [ &
          string_t("- name: assert") &
@@ -58,7 +59,6 @@ subroutine test_fpm_find(tests, passes)
       ,string_t("  description: CoArray Fortran Framework of Efficient Interfaces to Network Environments") &
       ,string_t("  categories: compiler") &
       ,string_t("  tags: parallel-runtime-library prif llvm-flang lfortran gasnet") &
-        ,string_t("build-systems: bash+fpm bash+cmake") &
     ] &
   )
     define_package_index_file_object: &
@@ -109,7 +109,7 @@ subroutine test_fpm_find(tests, passes)
               " searching on package-name text via the option `--name`"                , tests_subtotal, passes_subtotal)
             call test(size( nothing)==0                                                      , &
               " finding nothing for an unlisted package", tests_subtotal, passes_subtotal)
-            call test(size(     fpm)==2  .and. (fpm(1)%as_text() == fiats_pkg%as_text()) .and. (fpm(2)%as_text() == caffeine_pkg%as_text()), &
+            call test(size(     fpm)==2  .and. (fpm(1)%as_text() == julienne_pkg%as_text()) .and. (fpm(2)%as_text() == fiats_pkg%as_text()), &
               " searching on build-systems text via the command-line argumunt `fpm --build-systems`", tests_subtotal, passes_subtotal)
 
             print fmt(tests), "______ ", passes_subtotal, " of ", tests_subtotal, " tests passed. ______"
