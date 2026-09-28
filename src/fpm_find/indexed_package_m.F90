@@ -3,7 +3,7 @@
 
 module indexed_package_m
   !! Define an abstraction for the fortran-lang package-index packages
-  use julienne_m, only : string_t
+  use julienne_m, only : string_t, operator(.separatedBy.)
   implicit none
 
   private
@@ -15,21 +15,24 @@ module indexed_package_m
     character(len=:), allocatable :: name_, description_, categories_, tags_
     character(len=:), allocatable :: github_, gitlab_, url_ ! optional (zero length if not present)
     character(len=:), allocatable :: license_, version_     ! optional (zero length if not present)
+    type(string_t)  , allocatable :: build_systems_(:)      ! optional (zero-length array if not present)
   contains
     procedure url
     procedure as_text
     procedure contains
+    procedure build_systems
   end type
 
   interface indexed_package_t
 
     pure module function construct_from_components( &
-      name, description, categories, tags, license, version, github, gitlab, url) result(indexed_package)
+      name, description, categories, tags, license, version, github, gitlab, url, build_systems) result(indexed_package)
       !! Construct new indexed_package_t object from components
       implicit none
       character(len=*), intent(in) :: name, description, categories, tags
       character(len=*), intent(in), optional :: github, gitlab, url
       character(len=*), intent(in), optional :: license, version
+      type(string_t)  , intent(in), optional :: build_systems(:)
       type(indexed_package_t) indexed_package 
     end function
 
@@ -65,15 +68,22 @@ module indexed_package_m
       character(len=:), allocatable :: text
     end function
 
-    pure module function contains(self, search_string, search_name, search_url, case_sensitive) result(match)
+    pure module function contains(self, search_string, search_name, search_url, search_build_systems, case_sensitive) result(match)
       !! Result is true if any of the package's entries contain search_string as a substring; false otherwise.
       !! search_name and search_url restrict the search to the package name or URL of the union of the two.
       !! case_sensitive toggles case sensitivity
       implicit none
       class(indexed_package_t), intent(in) :: self
       character(len=*), intent(in) :: search_string
-      logical, intent(in) :: search_name, search_url, case_sensitive
+      logical, intent(in) :: search_name, search_url, search_build_systems, case_sensitive
       logical match
+    end function
+
+    pure module function build_systems(self) result(build_systems_list)
+      !! Result is a space-separated list of self's build systems
+      implicit none
+      class(indexed_package_t), intent(in) :: self
+      character(len=:), allocatable :: build_systems_list
     end function
 
   end interface

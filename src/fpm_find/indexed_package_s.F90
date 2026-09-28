@@ -10,6 +10,16 @@ submodule(indexed_package_m) indexed_package_s
 
 contains
 
+  module procedure build_systems
+    if (size(self%build_systems_)==0) then
+      build_systems_list = ""
+    else
+      associate(build_systems_string => self%build_systems_ .separatedBy. " ")
+        build_systems_list = build_systems_string%string()
+      end associate
+    end if
+  end procedure
+
   module procedure construct_from_components
     indexed_package%name_        = name
     indexed_package%description_ = description
@@ -47,7 +57,33 @@ contains
     else
       allocate(character(len=0) :: indexed_package%version_)
     end if
+
+    if (present(build_systems)) then
+      indexed_package%build_systems_ = build_systems
+    else
+      indexed_package%build_systems_ = [string_t::]
+    end if
   end procedure
+
+  pure function skip(line) result(comment_or_blank)
+    character(len=*), intent(in) :: line
+    logical comment_or_blank
+
+    if (len(trim(line)) == 0) then
+       comment_or_blank = .true.
+    else
+      block
+        character(len=:), allocatable :: hash_etc
+        hash_etc = adjustl(line)
+        if (hash_etc(1:1) == "#") then
+          comment_or_blank = .true.
+        else
+          comment_or_blank = .false.
+          return
+        end if
+      end block
+    end if
+  end function
 
   pure function get_key_value(key, lines) result(key_value)
     character(len=*), intent(in) :: key
@@ -72,28 +108,6 @@ contains
 
     key_value = ""
 
-  contains
-
-    pure function skip(line) result(comment_or_blank)
-      character(len=*), intent(in) :: line
-      logical comment_or_blank
-
-      if (len(trim(line)) == 0) then
-         comment_or_blank = .true.
-      else
-        block
-          character(len=:), allocatable :: hash_etc
-          hash_etc = adjustl(line)
-          if (hash_etc(1:1) == "#") then
-            comment_or_blank = .true.
-          else
-            comment_or_blank = .false.
-            return
-          end if
-        end block
-      end if
-    end function
-
   end function
 
   module procedure construct_from_strings
@@ -107,7 +121,64 @@ contains
       ,url         =  get_key_value(        "url", lines) &
       ,license     =  get_key_value(    "license", lines) &
       ,version     =  get_key_value(    "version", lines) &
+      ,build_systems= get_key_value_array("build-systems", lines) &
     )
+  contains
+
+    pure function extract_from_space_separated_strings(text) result(string_array)
+      character(len=*), intent(in) :: text
+      type(string_t), allocatable :: string_array(:)
+      integer c, s
+
+#ifdef __GFORTRAN__
+      block
+      character(len=:), allocatable :: trimmed
+      trimmed = trim(adjustl(text))
+#else
+      associate(trimmed => trim(adjustl(text)))
+#endif
+        associate( &
+           leading_edges  => [1, [(merge(c, 0, trimmed(c:c)/=" " .and. trimmed(c-1:c-1)==" "), c = 2, len(trimmed)  )]               ] &
+          ,trailing_edges => [   [(merge(c, 0, trimmed(c:c)/=" " .and. trimmed(c+1:c+1)==" "), c = 1, len(trimmed)-1)], len(trimmed) ] &
+        )
+          associate( &
+             leads  => pack( leading_edges,  leading_edges /= 0) &
+            ,trails => pack(trailing_edges, trailing_edges /= 0) &
+          )
+            string_array = [( string_t(trimmed(leads(s):trails(s))), s = 1, size(trails) )]
+          end associate
+        end associate
+#ifndef __GFORTRAN__
+      end associate
+#else
+      end block
+#endif
+    end function
+
+    pure function get_key_value_array(key, lines) result(key_value_array)
+      character(len=*),  intent(in) :: key
+      type(string_t)  ,  intent(in) :: lines(:)
+      type(string_t)  , allocatable :: key_value_array(:)
+      integer l
+
+      do l = 1, size(lines)
+        block
+          character(len=:), allocatable :: characters, key_values
+          characters = lines(l)%string()
+          if (skip(characters)) cycle
+          associate(colon => index(characters, ":"))
+            if (colon == 0) error stop "missing key/value separator ':'"
+            if (index(characters(1:colon-1), key)/=0)then
+              key_value_array = extract_from_space_separated_strings(characters(colon+1:))
+              return
+            end if
+          end associate
+        end block
+      end do
+
+      key_value_array = [string_t::]
+    end function
+
   end procedure
 
   module procedure construct_from_characters
@@ -176,7 +247,8 @@ contains
          "- name : "      // self%name_        // new_line('') &
       // "description : " // self%description_ // new_line('') &
       // "categories : "  // self%categories_  // new_line('') &
-      // "tags : "        // self%tags_
+      // "tags : "        // self%tags_        // new_line('') &
+      // "build-systems : " // self%build_systems()
 
     if (len(self%github_ )/=0) then
       text = text // new_line('') // "url : " // self%url()
@@ -197,14 +269,18 @@ contains
 
     character(len=:), allocatable :: search_subject
 
-    allocate(character(len=0) :: search_subject)
+    associate(search_all => .not. any([search_name, search_url, search_build_systems]))
 
-    if (search_name .or. (.not. search_url )) search_subject = search_subject // self%name_
-    if (search_url  .or. (.not. search_name)) search_subject = search_subject // self%url()
-
-    if (.not. any([search_name, search_url])) &
-      search_subject = search_subject &
-        // self%description_ // self%categories_ // self%tags_ // self%github_ // self%gitlab_ // self%license_ // self%version_
+      if (search_all) then
+        search_subject = self%description_ // self%categories_ // self%tags_ // self%github_ // self%gitlab_ // self%license_ &
+          // self%version_ // self%build_systems()
+      else
+        allocate(character(len=0) :: search_subject)
+        if (search_name         ) search_subject = search_subject // self%name_
+        if (search_url          ) search_subject = search_subject // self%url()
+        if (search_build_systems) search_subject = search_subject // self%build_systems()
+      end if
+    end associate
 
     if (case_sensitive) then
       match = index(search_subject, search_string) /= 0

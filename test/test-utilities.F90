@@ -2,7 +2,7 @@
 ! Terms of use are as specified in LICENSE.txt
 
 module test_utilities_m
-  !! Define procedures for us in fpm-find unit tests
+  !! Define procedures for use in fpm-find unit tests
   implicit none
 
   private

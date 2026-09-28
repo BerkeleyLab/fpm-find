@@ -35,6 +35,7 @@ subroutine test_fpm_find(tests, passes)
       ,string_t("  categories: testing") &
       ,string_t("  tags: unit-testing assertions pure-procedure-diagnostic-output") &
       ,string_t("  version: 3.4.1") &
+      ,string_t("build-systems: fpm") &
     ] &
     ,assert_entry => [ &
          string_t("- name: assert") &
@@ -50,6 +51,7 @@ subroutine test_fpm_find(tests, passes)
         ,string_t("categories : numerical") &
         ,string_t("tags : machine-learning deep-learning high-performance-computing") &
         ,string_t("url : https://github.com/BerkeleyLab/fiats") &
+        ,string_t("build-systems: fpm") &
     ] &
     ,caffeine_entry => [ &
        string_t("- name: caffeine") &
@@ -90,11 +92,11 @@ subroutine test_fpm_find(tests, passes)
       )
         find_package_entries: &
         associate( &
-           formal          => packages%find("formal"     , search_name=.false., search_url=.false., case_sensitive=.false.) &
-          ,fiats           => packages%find("BerkeleyLab", search_name=.false., search_url=.true. , case_sensitive=.true. ) &
-          ,caffeine        => packages%find("caffeine"   , search_name=.true. , search_url=.false., case_sensitive=.false.) &
-          ,nothing         => packages%find("nonexistent", search_name=.true. , search_url=.false., case_sensitive=.false.) &
-          ,julienne_assert => packages%find("assert"     , search_name=.false., search_url=.false., case_sensitive=.false.) &
+           formal   => packages%find("formal"     , search_name=.false., search_url=.false., search_build_systems=.false., case_sensitive=.false.) &
+          ,fiats    => packages%find("BerkeleyLab", search_name=.false., search_url=.true. , search_build_systems=.false., case_sensitive=.true. ) &
+          ,caffeine => packages%find("caffeine"   , search_name=.true. , search_url=.false., search_build_systems=.false., case_sensitive=.false.) &
+          ,nothing  => packages%find("nonexistent", search_name=.true. , search_url=.false., search_build_systems=.false., case_sensitive=.false.) &
+          ,fpm      => packages%find("fpm"        , search_name=.false., search_url=.false., search_build_systems=.true. , case_sensitive=.false.) &
         )
           block
             integer :: tests_subtotal = 0, passes_subtotal = 0
@@ -107,10 +109,8 @@ subroutine test_fpm_find(tests, passes)
               " searching on package-name text via the option `--name`"                , tests_subtotal, passes_subtotal)
             call test(size( nothing)==0                                                      , &
               " finding nothing for an unlisted package", tests_subtotal, passes_subtotal)
-            call test(size(julienne_assert) == 2 &
-              .and.  julienne_assert(1)%as_text() ==  julienne_pkg%as_text() &
-              .and.  julienne_assert(2)%as_text() ==    assert_pkg%as_text(), &
-               " finding two matching packages", tests_subtotal, passes_subtotal)
+            call test(size(     fpm)==2  .and. (fpm(1)%as_text() == julienne_pkg%as_text()) .and. (fpm(2)%as_text() == fiats_pkg%as_text()), &
+              " searching on build-systems text via the command-line argumunt `fpm --build-systems`", tests_subtotal, passes_subtotal)
 
             print fmt(tests), "______ ", passes_subtotal, " of ", tests_subtotal, " tests passed. ______"
 
