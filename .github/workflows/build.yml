@@ -319,8 +319,8 @@ jobs:
           test ${PIPESTATUS[0]} = 0 && grep -q -i /berkeleylab/julienne output
         fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- nasa --url --name 2>&1 | tee output
           test ${PIPESTATUS[0]} = 0 && grep -q -i /nasa/ output
-        fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- BerkeleyLab -u -c 2>&1 | tee output
-          test ${PIPESTATUS[0]} = 0 && grep -q -i /BerkeleyLab/ output
+        fpm run  ${FPM_FLAGS} --flag "$FFLAGS" -- FORTRAN -n -c 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /dav05/ output
 
     - name: Install and Test plugin
       run: |
@@ -332,6 +332,6 @@ jobs:
           test ${PIPESTATUS[0]} = 0 && grep -q -i /berkeleylab/julienne output
         fpm find nasa --url --name 2>&1 | tee output
           test ${PIPESTATUS[0]} = 0 && grep -q -i /nasa/ output
-        fpm find BerkeleyLab -u -c 2>&1 | tee output
-          test ${PIPESTATUS[0]} = 0 && grep -q -i /BerkeleyLab/ output
+        fpm find FORTRAN -n -c 2>&1 | tee output
+          test ${PIPESTATUS[0]} = 0 && grep -q -i /dav05/ output
 
